@@ -1,0 +1,17 @@
+---
+
+#- name: Install ELRepo GPG
+#  become: yes
+#  command: rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+
+#- name: Install ELRepo
+#  become: yes
+#  command: rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+
+#- name: Install ELRepo
+#  become: yes
+#  yum: name=http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm state=present
+
+- name: Install EPEL
+  become: yes
+  yum: name=epel-release state=present

@@ -1,0 +1,10 @@
+---
+- include_vars: "{{ ansible_os_family }}.yml"
+
+- name: install mysql-server
+  become: yes
+  package: "name={{mysql_package_name}} state=latest"
+
+- name: run mysql-server
+  become: yes
+  service: "name={{mysql_service_name}} state=started enabled=yes"

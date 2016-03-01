@@ -1,0 +1,22 @@
+---
+
+- name: Fix shortcomings
+  hosts: all
+
+  tasks:
+  - name: CentOS 7
+    include: CentOS-7-shortcomings.yml
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version|int == 7
+
+
+- name: Wordpressify Linodes
+  hosts: linodes
+
+  roles:
+    - common
+    - apache
+    - mariadb
+    - php
+    - wordpress
+
+  tasks:

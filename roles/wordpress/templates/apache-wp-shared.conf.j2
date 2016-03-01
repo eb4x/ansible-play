@@ -1,0 +1,17 @@
+AliasMatch ^/wordpress/[^/]*/index.php(.*)$            /usr/local/share/wordpress/{{ wp_version }}/index.php$1
+AliasMatch ^/wordpress/[^/]*/wp-activate.php(.*)$      /usr/local/share/wordpress/{{ wp_version }}/wp-activate.php$1
+AliasMatch ^/wordpress/[^/]*/wp-admin(.*)$             /usr/local/share/wordpress/{{ wp_version }}/wp-admin$1
+AliasMatch ^/wordpress/[^/]*/wp-blog-header.php(.*)$   /usr/local/share/wordpress/{{ wp_version }}/wp-blog-header.php$1
+AliasMatch ^/wordpress/[^/]*/wp-comments-post.php(.*)$ /usr/local/share/wordpress/{{ wp_version }}/wp-comments-post.php$1
+AliasMatch ^/wordpress/[^/]*/wp-config-sample.php(.*)$ /usr/local/share/wordpress/{{ wp_version }}/wp-config-sample.php$1
+AliasMatch ^/wordpress/[^/]*/wp-cron.php(.*)$          /usr/local/share/wordpress/{{ wp_version }}/wp-cron.php$1
+AliasMatch ^/wordpress/[^/]*/wp-includes(.*)$          /usr/local/share/wordpress/{{ wp_version }}/wp-includes$1
+AliasMatch ^/wordpress/[^/]*/wp-links-opml.php(.*)$    /usr/local/share/wordpress/{{ wp_version }}/wp-links-opml.php$1
+AliasMatch ^/wordpress/[^/]*/wp-load.php(.*)$          /usr/local/share/wordpress/{{ wp_version }}/wp-load.php$1
+AliasMatch ^/wordpress/[^/]*/wp-login.php(.*)$         /usr/local/share/wordpress/{{ wp_version }}/wp-login.php$1
+AliasMatch ^/wordpress/[^/]*/wp-mail.php(.*)$          /usr/local/share/wordpress/{{ wp_version }}/wp-mail.php$1
+AliasMatch ^/wordpress/[^/]*/wp-settings.php(.*)$      /usr/local/share/wordpress/{{ wp_version }}/wp-settings.php$1
+AliasMatch ^/wordpress/[^/]*/wp-signup.php(.*)$        /usr/local/share/wordpress/{{ wp_version }}/wp-signup.php$1
+AliasMatch ^/wordpress/[^/]*/wp-trackback.php(.*)$     /usr/local/share/wordpress/{{ wp_version }}/wp-trackback.php$1
+AliasMatch ^/wordpress/[^/]*/xmlrpc.php(.*)$           /usr/local/share/wordpress/{{ wp_version }}/xmlrpc.php$1
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet

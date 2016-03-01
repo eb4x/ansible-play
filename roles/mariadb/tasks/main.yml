@@ -1,0 +1,10 @@
+---
+- include_vars: "{{ ansible_os_family }}.yml"
+
+- name: install mariadb-server
+  become: yes
+  package: "name=mariadb-server state=latest"
+
+- name: run mariadb-server
+  become: yes
+  service: "name={{mariadb_service_name}} state=started enabled=yes"

@@ -1,0 +1,74 @@
+<?php
+
+$client_path = null;
+
+# If access on default-ssl.conf
+if ( $_SERVER['HTTP_HOST'] === '{{ ansible_fqdn }}' ) {
+  preg_match('/^\/wordpress\/(.+?)\//', $_SERVER['REQUEST_URI'], $client_path);
+  $client_path = $client_path[1];
+
+  define('WP_CONTENT_URL', 'https://{{ ansible_fqdn }}/wordpress/'. $client_path .'/wp-content');
+
+# if access on clientdomain.conf
+} else {
+  $client_path = preg_replace('/\/var\/www\/wordpress\//', "", $_SERVER['DOCUMENT_ROOT']);
+
+  define('WP_CONTENT_URL', $_SERVER['HTTP_HOST'] .'/wp-content');
+}
+define('WP_CONTENT_DIR', '/var/www/wordpress/'. $client_path .'/wp-content');
+
+define('WP_SITEURL', 'https://{{ ansible_fqdn }}/wordpress/'. $client_path);
+
+$client_file = '/var/www/wordpress/'. strtolower($client_path) .'/wp-config.php';
+if (file_exists($client_file)) {
+    require_once($client_file);
+    define('CLIENT_FILE', $client_file);
+} else {
+    header("HTTP/1.1 404 Not Found");
+    echo "Configuration for <b>$client_path</b>.";
+    exit(1);
+}
+
+/* Default value for some constants if they have not yet been set
+   by the host-specific config files */
+
+if (!defined('DB_CHARSET'))
+	define('DB_CHARSET', 'utf8');
+
+if (!defined('DB_COLLATE'))
+	define('DB_COLLATE', '');
+
+if (!defined('WP_CORE_UPDATE'))
+	define('WP_CORE_UPDATE', false);
+
+if (!defined('WP_AUTO_UPDATE_CORE'))
+	define( 'WP_AUTO_UPDATE_CORE', false);
+
+if (!defined('WP_ALLOW_MULTISITE'))
+	define('WP_ALLOW_MULTISITE', true);
+
+if (!defined('WP_DEBUG'))
+	define('WP_DEBUG', false);
+
+if (!defined('FORCE_SSL_ADMIN'))
+	define('FORCE_SSL_ADMIN', true);
+
+if (!defined('FS_METHOD'))
+	define('FS_METHOD', 'direct');
+
+/* Default value for the table_prefix variable so that it doesn't need to
+   be put in every host-specific config file */
+
+if (!isset($table_prefix)) {
+    $table_prefix = 'wp_';
+}
+
+if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
+          $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+    $_SERVER['HTTPS'] = 'on';
+
+define('ABSPATH', '/usr/local/share/wordpress/{{ wp_version }}/');
+require_once(ABSPATH . 'wp-settings.php');
+
+?>
+
