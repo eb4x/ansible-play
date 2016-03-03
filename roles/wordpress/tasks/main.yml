@@ -4,32 +4,35 @@
   action: "uri url=https://api.wordpress.org/core/version-check/1.7/ return_content=yes"
   register: wp_response
 
-# XXX If this doesn't exist/resolve we should just back off completely.
-- debug: var=wp_version
+- name: check that wp_version is defined
+  assert: { that: wp_version is defined }
+
+- name: "check if wordpress-{{wp_version}} is configured"
+  stat: path=/usr/local/share/wordpress/{{ wp_version }}/wp-config.php
+  register: wp_configured
 
 - name: check /etc/wordpress
   file: path=/etc/wordpress state=directory
   become: yes
 
 - name: copy apache-client config
-  template: src=apache-wp-client.conf.j2 dest=/etc/wordpress/apache-wp-client.conf force=no
+  template: src=apache-wp-client.conf.j2 dest=/etc/wordpress/apache-wp-client.conf
   become: yes
+  when: not wp_configured.stat.exists
 
 - name: copy apache-shared config
-  template: src=apache-wp-shared.conf.j2 dest=/etc/wordpress/apache-wp-shared.conf force=no
+  template: src=apache-wp-shared.conf.j2 dest=/etc/wordpress/apache-wp-shared.conf
   become: yes
+  when: not wp_configured.stat.exists
 
 - name: copy wp-config.php
-  template: src=wp-config.php.j2 dest=/etc/wordpress/wp-config.php force=no
+  template: src=wp-config.php.j2 dest=/etc/wordpress/wp-config.php
   become: yes
+  when: not wp_configured.stat.exists
 
-- name: check /usr/local/share/wordpress
+- name: "check /usr/local/share/wordpress/{{ wp_version }}"
   file: path=/usr/local/share/wordpress/{{ wp_version }} state=directory
   become: yes
-
-- name: stat path
-  stat: path=/usr/local/share/wordpress/{{ wp_version }}/wp-config.php
-  register: wp_configured
 
 - name: download and extract wordpress
   become: yes
@@ -37,7 +40,8 @@
 #  unarchive: src=https://downloads.wordpress.org/release/wordpress-{{ wp_version }}.tar.gz dest=/usr/local/share/wordpress/{{ wp_version }} copy=no
   when: not wp_configured.stat.exists
 
-- name: symlink wp-config.php
+- name: configure/symlink wp-config.php
   file: src=/etc/wordpress/wp-config.php dest=/usr/local/share/wordpress/{{ wp_version }}/wp-config.php state=link
   become: yes
+  when: not wp_configured.stat.exists
 
