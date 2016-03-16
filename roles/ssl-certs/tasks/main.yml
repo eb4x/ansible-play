@@ -33,10 +33,12 @@
 
 - name: stat dir for verification
   stat: path="/etc/ssl/private"
+  become: yes
   register: dir
 
 - name: stat key for verification
   stat: path="/etc/ssl/private/{{ ansible_fqdn }}.key"
+  become: yes
   register: key
 
 #- name: dump dir
