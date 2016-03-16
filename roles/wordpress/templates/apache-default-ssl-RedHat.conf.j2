@@ -1,0 +1,49 @@
+<VirtualHost _default_:80 _default_:8000>
+	#ServerName www.example.com
+
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www
+
+	RewriteEngine on
+	RewriteCond %{HTTPS} off
+	RewriteRule (.*) https://{{ ansible_fqdn }}%{REQUEST_URI} [L,R=301]
+
+	#LogLevel info ssl:warn
+	ErrorLog logs/localhost.err
+	CustomLog logs/localhost.log combined
+</VirtualHost>
+
+<IfModule mod_ssl.c>
+	<VirtualHost _default_:443>
+		#ServerName www.example.com
+
+		ServerAdmin webmaster@localhost
+		DocumentRoot /var/www
+
+		<Directory /var/www/>
+			Options -Indexes
+		</Directory>
+
+		Include /etc/wordpress/apache-wp-shared.conf
+
+		#LogLevel info ssl:warn
+		ErrorLog logs/localhost.err
+		CustomLog logs/localhost.log combined
+
+		SSLEngine on
+		SSLCertificateKeyFile   /etc/ssl/private/{{ ansible_fqdn }}.key
+		SSLCertificateFile      /etc/ssl/private/{{ ansible_fqdn }}.crt
+		SSLCertificateChainFile /etc/ssl/private/chain.crt
+		SSLCACertificateFile    /etc/ssl/private/ca.crt
+
+
+		BrowserMatch "MSIE [2-6]" \
+				nokeepalive ssl-unclean-shutdown \
+				downgrade-1.0 force-response-1.0
+		# MSIE 7 and newer should be able to use keepalive
+		BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+
+	</VirtualHost>
+</IfModule>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
