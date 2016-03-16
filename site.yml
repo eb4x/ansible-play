@@ -1,22 +1,34 @@
 ---
 
-- name: Fix shortcomings
-  hosts: all
-
-  tasks:
-  - name: CentOS 7
-    include: CentOS-7-shortcomings.yml
-    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version|int == 7
-
-
 - name: Wordpressify Linodes
   hosts: linodes
+
+  vars_prompt:
+    - name: ssl_certs_password
+      prompt: "Password for unlocking protected keys"
+      private: true
+
+  pre_tasks:
+
+  - name: install EPEL on CentOS 7
+    yum: name=epel-release state=latest
+    become: yes
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version|int == 7
+
+  - name: install python2-dnf on Fedora 22+
+    command: dnf install python2-dnf -y warn=false
+    become: yes
+    when: ansible_distribution == 'Fedora' and ansible_distribution_major_version|int >= 22
+
+  - name: install libselinux-python on Fedora
+    package: name=libselinux-python state=latest
+    become: yes
+    when: ansible_distribution == 'Fedora'
 
   roles:
     - common
     - apache
     - mariadb
+    - ssl-certs
     - php
     - wordpress
-
-  tasks:
