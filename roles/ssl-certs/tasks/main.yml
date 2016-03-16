@@ -1,0 +1,54 @@
+---
+
+- name: check/create ssl-cert group
+  group: name=ssl-cert system=yes state=present
+  become: yes
+
+# We add the g+s here, to keep ssl-cert group on future files
+- name: check/create /etc/ssl/private
+  file: path=/etc/ssl/private state=directory mode=u+rwx,g+rsx,o-rwx owner=root group=ssl-cert
+  become: yes
+
+- name: copy chain
+  copy: src="chain.crt" dest="/etc/ssl/private/chain.crt" mode=0640 owner=root group=ssl-cert
+  become: yes
+
+- name: copy crt
+  copy: src="{{ ansible_fqdn }}.crt" dest="/etc/ssl/private/{{ ansible_fqdn }}.crt" mode=0640 owner=root group=ssl-cert
+  become: yes
+
+- name: copy key
+  copy: src="{{ ansible_fqdn }}.key.protected" dest="/etc/ssl/private/{{ ansible_fqdn }}.key.protected" mode=0640 owner=root group=ssl-cert
+  become: yes
+
+- name: strip key
+  command: openssl rsa -in {{ ansible_fqdn }}.key.protected -out {{ ansible_fqdn }}.key -passin pass:{{ssl_certs_password}} chdir=/etc/ssl/private creates=/etc/ssl/private/{{ ansible_fqdn }}.key
+  become: yes
+
+# Not strictly necessary thanks to directory permissions,
+# but there's something to be said about consistency.
+- name: fix permissions on key
+  file: path=/etc/ssl/private/{{ ansible_fqdn }}.key mode=0640
+  become: yes
+
+- name: stat dir for verification
+  stat: path="/etc/ssl/private"
+  register: dir
+
+- name: stat key for verification
+  stat: path="/etc/ssl/private/{{ ansible_fqdn }}.key"
+  register: key
+
+#- name: dump dir
+#  debug: var=dir
+#- name: dump file
+#  debug: var=key
+
+- assert:
+    that:
+      - dir.stat.pw_name == 'root'
+      - dir.stat.gr_name == 'ssl-cert'
+      - dir.stat.mode    == '2750'
+      - key.stat.pw_name == 'root'
+      - key.stat.gr_name == 'ssl-cert'
+      - key.stat.mode    == '0640'
