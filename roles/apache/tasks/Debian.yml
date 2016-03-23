@@ -1,0 +1,6 @@
+---
+
+- name: enable rewrite module
+  apache2_module: name=rewrite state=present
+- name: enable ssl module
+  apache2_module: name=ssl state=present

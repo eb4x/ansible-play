@@ -32,3 +32,12 @@
     - ssl-certs
     - php
     - wordpress
+
+  tasks:
+  - name: enable some much-needed modules
+    include: "roles/apache/tasks/{{ ansible_os_family }}.yml"
+    when: ansible_os_family == 'Debian'
+
+  - name: convert httpd to a more debian-esq style
+    include: "roles/apache/tasks/{{ ansible_os_family }}.yml"
+    when: ansible_os_family == 'RedHat'

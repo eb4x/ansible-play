@@ -1,0 +1,355 @@
+---
+
+#
+# upstream apache configuration used by RedHat systems is a
+# {flaming turd|steaming pile of shit} This is an attempt to clean it up
+# in a somewhat debian-esque manner, and make it less sucky.
+#
+
+- name: stop httpd
+  service: name=httpd state=stopped
+  become: yes
+
+- name: check conf-available directory
+  file: path=/etc/httpd/conf-available state=directory
+  become: yes
+
+- name: check conf-enabled directory
+  file: path=/etc/httpd/conf-enabled state=directory
+  become: yes
+
+- name: check mods-available directory
+  file: path=/etc/httpd/mods-available state=directory
+  become: yes
+
+- name: check mods-enabled directory
+  file: path=/etc/httpd/mods-enabled state=directory
+  become: yes
+
+- name: check sites-available directory
+  file: path=/etc/httpd/sites-available state=directory
+  become: yes
+
+- name: check sites-enabled directory
+  file: path=/etc/httpd/sites-enabled state=directory
+  become: yes
+
+- name: check /var/lock/httpd directory
+  file: path=/var/lock/httpd state=directory owner=apache group=apache
+  become: yes
+
+- name: check /var/www directory
+  file: path=/var/www state=directory owner=apache group=apache mode=2775
+  become: yes
+
+# apache
+
+- name: fix /etc/sysconfig/httpd
+  lineinfile: dest=/etc/sysconfig/httpd regexp='^OPTIONS=*' line="OPTIONS=\"-f httpd.conf\"" insertafter='^#OPTIONS=*' state=present
+  become: yes 
+
+- name: remove conf/httpd.conf
+  file: path=/etc/httpd/conf/httpd.conf state=absent
+  become: yes
+- name: check for httpd.conf
+  stat: path=/etc/httpd/httpd.conf
+  register: res
+- name: copy httpd.conf file
+  copy: src=roles/apache/files/httpd.conf dest=/etc/httpd/httpd.conf
+  become: yes
+  when: res.stat.exists == false
+
+- name: check for magic
+  stat: path=/etc/httpd/conf/magic
+  register: res
+- name: move magic
+  command: mv /etc/httpd/conf/magic /etc/httpd/magic
+  become: yes
+  when: res.stat.exists == true
+
+- name: check for ports.conf
+  stat: path=/etc/httpd/ports.conf
+  register: res
+- name: copy ports.conf template
+  copy: src=roles/apache/files/ports.conf dest=/etc/httpd/ports.conf
+  become: yes
+  when: res.stat.exists == false
+
+# conf-available
+
+- name: check for conf-available/charset.conf
+  stat: path=/etc/httpd/conf-available/charset.conf
+  register: res
+- name: copy charset.conf file
+  copy: src=roles/apache/files/conf-available/charset.conf dest=/etc/httpd/conf-available/charset.conf
+  become: yes
+  when: res.stat.exists == false
+- name: create conf-enabled symlink for charset.conf
+  file: src=../conf-available/charset.conf dest=/etc/httpd/conf-enabled/charset.conf state=link
+  become: yes
+
+- name: check for conf-available/localized-error-pages.conf
+  stat: path=/etc/httpd/conf-available/localized-error-pages.conf
+  register: res
+- name: copy localized-error-pages.conf file
+  copy: src=roles/apache/files/conf-available/localized-error-pages.conf dest=/etc/httpd/conf-available/localized-error-pages.conf
+  become: yes
+  when: res.stat.exists == false
+- name: create conf-enabled symlink for userdir.conf
+  file: src=../conf-available/localized-error-pages.conf dest=/etc/httpd/conf-enabled/localized-error-pages.conf state=link
+  become: yes
+
+- name: check for conf.d/welcome.conf
+  stat: path=/etc/httpd/conf.d/welcome.conf
+  register: res
+- name: move/rename to conf-available/welcome.conf
+  command: mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf-available/welcome.conf
+  become: yes
+  when: res.stat.exists == true
+- name: create conf-enabled symlink for welcome.conf
+  file: src=../conf-available/welcome.conf dest=/etc/httpd/conf-enabled/welcome.conf state=link
+  become: yes
+
+# create base modules
+
+- name: super-clean-out conf.modules.d/00-base.conf
+  script: roles/apache/files/split-00-base.conf.py removes=/etc/httpd/conf.modules.d/00-base.conf
+  become: yes
+
+- name: check for mods-available/alias.conf
+  stat: path=/etc/httpd/mods-available/alias.conf
+  register: res
+- name: copy alias.conf template
+  copy: src=roles/apache/files/mods-available/alias.conf dest=/etc/httpd/mods-available/alias.conf
+  become: yes
+  when: res.stat.exists == false
+- name: create mods-enabled symlink for alias.conf
+  file: src=../mods-available/alias.conf dest=/etc/httpd/mods-enabled/alias.conf state=link
+  become: yes
+
+- name: check for conf.d/autoindex.conf
+  stat: path=/etc/httpd/conf.d/autoindex.conf
+  register: res
+- name: move/rename to mods-available/autoindex.conf
+  command: mv /etc/httpd/conf.d/autoindex.conf /etc/httpd/mods-available/autoindex.conf
+  become: yes
+  when: res.stat.exists
+- name: create mods-enabled symlink for autoindex.conf
+  file: src=../mods-available/autoindex.conf dest=/etc/httpd/mods-enabled/autoindex.conf state=link
+  become: yes
+
+- name: check for mods-available/dir.conf
+  stat: path=/etc/httpd/mods-available/dir.conf
+  register: res
+- name: copy dir.conf template
+  copy: src=roles/apache/files/mods-available/dir.conf dest=/etc/httpd/mods-available/dir.conf
+  become: yes
+  when: res.stat.exists == false
+- name: create mods-enabled symlink for dir.conf
+  file: src=../mods-available/dir.conf dest=/etc/httpd/mods-enabled/dir.conf state=link
+  become: yes
+
+- name: check for mods-available/mime.conf
+  stat: path=/etc/httpd/mods-available/mime.conf
+  register: res
+- name: copy mime.conf template
+  copy: src=roles/apache/files/mods-available/mime.conf dest=/etc/httpd/mods-available/mime.conf
+  become: yes
+  when: res.stat.exists == false
+- name: create mods-enabled symlink for mime.conf
+  file: src=../mods-available/mime.conf dest=/etc/httpd/mods-enabled/mime.conf state=link
+  become: yes
+
+- name: check for mods-available/mime_magic.conf
+  stat: path=/etc/httpd/mods-available/mime_magic.conf
+  register: res
+- name: copy mime_magic.conf template
+  copy: src=roles/apache/files/mods-available/mime_magic.conf dest=/etc/httpd/mods-available/mime_magic.conf
+  become: yes
+  when: res.stat.exists == false
+- name: create mods-enabled symlink for mime_magic.conf
+  file: src=../mods-available/mime_magic.conf dest=/etc/httpd/mods-enabled/mime_magic.conf state=link
+  become: yes
+
+- name: check for conf.d/userdir.conf
+  stat: path=/etc/httpd/conf.d/userdir.conf
+  register: res
+- name: move/rename to mods-available/userdir.conf
+  command: mv /etc/httpd/conf.d/userdir.conf /etc/httpd/mods-available/userdir.conf
+  become: yes
+  when: res.stat.exists
+- name: create mods-enabled symlink for userdir.conf
+  file: src=../mods-available/userdir.conf dest=/etc/httpd/mods-enabled/userdir.conf state=link
+  become: yes
+
+# mods-available
+
+- name: check for conf.modules.d/01-cgi.conf
+  stat: path=/etc/httpd/conf.modules.d/01-cgi.conf
+  register: res
+- name: move/rename to mods-available/cgid.load
+  command: mv /etc/httpd/conf.modules.d/01-cgi.conf /etc/httpd/mods-available/cgid.load
+  become: yes
+  when: res.stat.exists == true
+- name: create mods-enabled symlink for cgid.load
+  file: src=../mods-available/cgid.load dest=/etc/httpd/mods-enabled/cgid.load state=link
+  become: yes
+  when: res.stat.exists == true
+
+- name: check for conf.modules.d/00-dav.conf
+  stat: path=/etc/httpd/conf.modules.d/00-dav.conf
+  register: res
+- name: move/rename to mods-available/dav.load
+  command: mv /etc/httpd/conf.modules.d/00-dav.conf /etc/httpd/mods-available/dav.load
+  become: yes
+  when: res.stat.exists == true
+- name: create mods-enabled symlink for dav.load
+  file: src=../mods-available/dav.load dest=/etc/httpd/mods-enabled/dav.load state=link
+  become: yes
+
+- name: check for conf.d/mod_dnssd.conf
+  stat: path=/etc/httpd/conf.d/mod_dnssd.conf
+  register: res
+- name: move/rename to mods-available/dnssd.conf
+  command: mv /etc/httpd/conf.d/mod_dnssd.conf /etc/httpd/mods-available/dnssd.conf
+  become: yes
+  when: res.stat.exists == true
+- name: create mods-enabled symlink for dnssd.conf
+  file: src=../mods-available/dnssd.conf dest=/etc/httpd/mods-enabled/dnssd.conf state=link
+  become: yes
+  when: res.stat.exists == true
+
+- name: check for conf.modules.d/10-mod_dnssd.conf
+  stat: path=/etc/httpd/conf.modules.d/10-mod_dnssd.conf
+  register: res
+- name: move/rename to mods-available/dnssd.load
+  command: mv /etc/httpd/conf.modules.d/10-mod_dnssd.conf /etc/httpd/mods-available/dnssd.load
+  become: yes
+  when: res.stat.exists == true
+- name: create mods-enabled symlink for dnssd.load
+  file: src=../mods-available/dnssd.load dest=/etc/httpd/mods-enabled/dnssd.load state=link
+  become: yes
+  when: res.stat.exists == true
+
+- name: check for conf.modules.d/00-lua.conf
+  stat: path=/etc/httpd/conf.modules.d/00-lua.conf
+  register: res
+- name: move/rename to mods-available/lua.load
+  command: mv /etc/httpd/conf.modules.d/00-lua.conf /etc/httpd/mods-available/lua.load
+  become: yes
+  when: res.stat.exists == true
+- name: create mods-enabled symlink for lua.load
+  file: src=../mods-available/lua.load dest=/etc/httpd/mods-enabled/lua.load state=link
+  become: yes
+
+- name: check for conf.modules.d/00-mpm.conf
+  stat: path=/etc/httpd/conf.modules.d/00-mpm.conf
+  register: res
+- name: move/rename to mods-available/mpm.load
+  command: mv /etc/httpd/conf.modules.d/00-mpm.conf /etc/httpd/mods-available/mpm.load
+  become: yes
+  when: res.stat.exists == true
+- name: create mods-enabled symlink for mpm.load
+  file: src=../mods-available/mpm.load dest=/etc/httpd/mods-enabled/mpm.load state=link
+  become: yes
+  when: res.stat.exists == true
+
+- name: check for conf.d/php.conf
+  stat: path=/etc/httpd/conf.d/php.conf
+  register: res
+
+- name: move/rename to mods-available/php.conf
+  command: mv /etc/httpd/conf.d/php.conf /etc/httpd/mods-available/php.conf
+  become: yes
+  when: res.stat.exists
+- name: create mods-enabled symlink for php.conf
+  file: src=../mods-available/php.conf dest=/etc/httpd/mods-enabled/php.conf state=link
+  become: yes
+  when: res.stat.exists
+
+- name: check for conf.modules.d/10-php.conf
+  stat: path=/etc/httpd/conf.modules.d/10-php.conf
+  register: res
+- name: move/rename to mods-available/php.load
+  command: mv /etc/httpd/conf.modules.d/10-php.conf /etc/httpd/mods-available/php.load
+  become: yes
+  when: res.stat.exists
+- name: create mods-enabled symlink for php.load
+  file: src=../mods-available/php.load dest=/etc/httpd/mods-enabled/php.load state=link
+  become: yes
+  when: res.stat.exists
+
+- name: check for conf.modules.d/00-proxy.conf
+  stat: path=/etc/httpd/conf.modules.d/00-proxy.conf
+  register: res
+- name: move/rename to mods-available/proxy.load
+  command: mv /etc/httpd/conf.modules.d/00-proxy.conf /etc/httpd/mods-available/proxy.load
+  become: yes
+  when: res.stat.exists == true
+- name: create mods-enabled symlink for proxy.load
+  file: src=../mods-available/proxy.load dest=/etc/httpd/mods-enabled/proxy.load state=link
+  become: yes
+
+- name: check for conf.d/ssl.conf
+  stat: path=/etc/httpd/conf.d/ssl.conf
+  register: res
+- name: strip Listen from ssl.conf
+  lineinfile: dest=/etc/httpd/conf.d/ssl.conf line="Listen 443 https" state=absent
+  become: yes
+  when: res.stat.exists == true
+- name: force TLSv1.2 only
+  lineinfile: dest=/etc/httpd/conf.d/ssl.conf line="SSLProtocol TLSv1.2" state=present
+  become: yes
+  when: res.stat.exists == true
+- name: strip <VirtualHost> from ssl.conf
+  replace: dest=/etc/httpd/conf.d/ssl.conf regexp='^<VirtualHost _default_:443>((?:.|\n)*?)</VirtualHost>\s+$' replace=''
+  become: yes
+  when: res.stat.exists == true
+- name: move/rename to mods-available/ssl.conf
+  command: mv /etc/httpd/conf.d/ssl.conf /etc/httpd/mods-available/ssl.conf
+  become: yes
+  when: res.stat.exists == true
+- name: create mods-enabled symlink for ssl.conf
+  file: src=../mods-available/ssl.conf dest=/etc/httpd/mods-enabled/ssl.conf state=link
+  become: yes
+  when: res.stat.exists == true
+
+- name: check for apache/conf.modules.d/00-ssl.conf
+  stat: path=/etc/httpd/conf.modules.d/00-ssl.conf
+  register: res
+- name: move/rename to mods-available/ssl.load
+  command: mv /etc/httpd/conf.modules.d/00-ssl.conf /etc/httpd/mods-available/ssl.load
+  become: yes
+  when: res.stat.exists == true
+- name: create mods-enabled symlink for ssl.load
+  file: src=../mods-available/ssl.load dest=/etc/httpd/mods-enabled/ssl.load state=link
+  become: yes
+  when: res.stat.exists == true
+
+- name: check for conf.modules.d/00-systemd.conf
+  stat: path=/etc/httpd/conf.modules.d/00-systemd.conf
+  register: res
+- name: move/rename to mods-available/systemd.load
+  command: mv /etc/httpd/conf.modules.d/00-systemd.conf /etc/httpd/mods-available/systemd.load
+  become: yes
+  when: res.stat.exists == true
+- name: create mods-enabled symlink for systemd.load
+  file: src=../mods-available/systemd.load dest=/etc/httpd/mods-enabled/systemd.load state=link
+  become: yes
+  when: res.stat.exists == true
+
+
+# Residual
+
+- name: remove residual files and symlinks
+  script: roles/apache/files/residual.py removes=/etc/httpd/conf.d/README
+  become: yes
+
+#- name: "remove if empty: /etc/httpd/conf"
+#- name: "remove if empty: /etc/httpd/conf.d"
+#- name: "remove if empty: /etc/httpd/conf.modules.d"
+
+- name: start httpd
+  service: name=httpd state=started
+  become: yes
+
