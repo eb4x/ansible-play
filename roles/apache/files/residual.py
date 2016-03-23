@@ -27,7 +27,7 @@ for mod in mods:
 os.remove("conf.d/README")
 
 if os.listdir("conf") == []:
-	os.rmdir("conf")	
+	os.rmdir("conf")
 
 if os.listdir("conf.d") == []:
 	os.rmdir("conf.d")

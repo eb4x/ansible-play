@@ -46,7 +46,7 @@
 
 - name: fix /etc/sysconfig/httpd
   lineinfile: dest=/etc/sysconfig/httpd regexp='^OPTIONS=*' line="OPTIONS=\"-f httpd.conf\"" insertafter='^#OPTIONS=*' state=present
-  become: yes 
+  become: yes
 
 - name: remove conf/httpd.conf
   file: path=/etc/httpd/conf/httpd.conf state=absent
