@@ -1,1 +1,2 @@
+roles/ssl-certs/files/*.csr
 roles/ssl-certs/files/*.key
