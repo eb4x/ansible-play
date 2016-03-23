@@ -1,5 +1,7 @@
 ---
 
+- include_vars: "{{ ansible_os_family }}.yml"
+
 - name: json wordpress version check
   action: "uri url=https://api.wordpress.org/core/version-check/1.7/ return_content=yes"
   register: wp_response
@@ -31,7 +33,7 @@
   when: not wp_configured.stat.exists
 
 - name: "check /usr/local/share/wordpress/{{ wp_version }}"
-  file: path=/usr/local/share/wordpress/{{ wp_version }} state=directory
+  file: path=/usr/local/share/wordpress/{{ wp_version }} state=directory owner=root group=root mode=0755 setype=httpd_sys_content_t
   become: yes
 
 - name: download and extract wordpress
@@ -45,3 +47,40 @@
   become: yes
   when: not wp_configured.stat.exists
 
+#
+# Cleanup.
+#
+
+- name: remove sites-enabled/000-default.conf
+  file: path={{apache_config_path}}/sites-enabled/000-default.conf state=absent
+  become: yes
+- name: remove sites-available/000-default.conf
+  file: path={{apache_config_path}}/sites-available/000-default.conf state=absent
+  become: yes
+
+#
+# Glue.
+#
+
+#- name: fix permissions to /usr/local/share/wordpress
+#  blockinfile:
+#    dest: "{{apache_config_path}}/{{apache_config_file}}"
+#    insertafter: "^#<Directory /srv/>((?:.|\n)*?)</Directory>\s+$"
+#    block: |
+#      <Directory /usr/local/share/wordpress>
+#          Options Indexes FollowSymLinks
+#          AllowOverride None
+#          Require all granted
+#      </Directory>
+#  become: yes
+
+- name: copy default-ssl.conf in sites-available
+  template: src="apache-default-ssl-{{ ansible_os_family }}.conf.j2" dest="{{apache_config_path}}/sites-available/default-ssl.conf" force=yes
+  become: yes
+  when: not wp_configured.stat.exists
+- name: create sites-enabled symlink for default-ssl.conf
+  file: src=../sites-available/default-ssl.conf dest={{apache_config_path}}/sites-enabled/default-ssl.conf
+  become: yes
+  notify:
+    - reload apache
+  when: not wp_configured.stat.exists

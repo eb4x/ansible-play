@@ -1,5 +1,5 @@
 <VirtualHost _default_:80 _default_:8000>
-	#ServerName www.example.com
+	ServerName {{ ansible_fqdn }}
 
 	ServerAdmin webmaster@localhost
 	DocumentRoot /var/www
@@ -9,13 +9,13 @@
 	RewriteRule (.*) https://{{ ansible_fqdn }}%{REQUEST_URI} [L,R=301]
 
 	#LogLevel info ssl:warn
-	ErrorLog logs/localhost.err
-	CustomLog logs/localhost.log combined
+	ErrorLog /var/log/httpd/localhost.err
+	CustomLog /var/log/httpd/localhost.log combinedio
 </VirtualHost>
 
 <IfModule mod_ssl.c>
 	<VirtualHost _default_:443>
-		#ServerName www.example.com
+		ServerName {{ ansible_fqdn }}
 
 		ServerAdmin webmaster@localhost
 		DocumentRoot /var/www
@@ -27,14 +27,14 @@
 		Include /etc/wordpress/apache-wp-shared.conf
 
 		#LogLevel info ssl:warn
-		ErrorLog logs/localhost.err
-		CustomLog logs/localhost.log combined
+		ErrorLog /var/log/httpd/localhost.err
+		CustomLog /var/log/httpd/localhost.log combinedio
 
 		SSLEngine on
 		SSLCertificateKeyFile   /etc/ssl/private/{{ ansible_fqdn }}.key
 		SSLCertificateFile      /etc/ssl/private/{{ ansible_fqdn }}.crt
 		SSLCertificateChainFile /etc/ssl/private/chain.crt
-		SSLCACertificateFile    /etc/ssl/private/ca.crt
+		#SSLCACertificateFile    /etc/ssl/private/ca.crt
 
 
 		BrowserMatch "MSIE [2-6]" \

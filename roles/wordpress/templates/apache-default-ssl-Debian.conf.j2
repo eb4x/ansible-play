@@ -1,5 +1,5 @@
 <VirtualHost _default_:80 _default_:8000>
-	#ServerName www.example.com
+	ServerName {{ ansible_fqdn }}
 
 	ServerAdmin webmaster@localhost
 	DocumentRoot /var/www
@@ -15,7 +15,7 @@
 
 <IfModule mod_ssl.c>
 	<VirtualHost _default_:443>
-		#ServerName www.example.com
+		ServerName {{ ansible_fqdn }}
 
 		ServerAdmin webmaster@localhost
 		DocumentRoot /var/www
@@ -34,7 +34,7 @@
 		SSLCertificateKeyFile   /etc/ssl/private/{{ ansible_fqdn }}.key
 		SSLCertificateFile      /etc/ssl/private/{{ ansible_fqdn }}.crt
 		SSLCertificateChainFile /etc/ssl/private/chain.crt
-		SSLCACertificateFile    /etc/ssl/private/ca.crt
+		#SSLCACertificateFile    /etc/ssl/private/ca.crt
 
 
 		BrowserMatch "MSIE [2-6]" \
