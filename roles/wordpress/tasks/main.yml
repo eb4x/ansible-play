@@ -9,7 +9,7 @@
 - name: check that wp_version is defined
   assert: { that: wp_version is defined }
 
-- name: "check if wordpress-{{wp_version}} is configured"
+- name: "check if wordpress/{{wp_version}}/wp-config.php is symlinked"
   stat: path=/usr/local/share/wordpress/{{ wp_version }}/wp-config.php
   register: wp_configured
 
@@ -38,49 +38,13 @@
 
 - name: download and extract wordpress
   become: yes
-  shell: wget https://downloads.wordpress.org/release/wordpress-{{ wp_version }}.tar.gz -O - | tar -C /usr/local/share/wordpress/{{ wp_version }} --strip=1 -xzf -
+  shell: wget https://downloads.wordpress.org/release/wordpress-{{ wp_version }}.tar.gz -O - | tar -C /usr/local/share/wordpress/{{ wp_version }} --strip=1 -xzf - warn=false
 #  unarchive: src=https://downloads.wordpress.org/release/wordpress-{{ wp_version }}.tar.gz dest=/usr/local/share/wordpress/{{ wp_version }} copy=no
   when: not wp_configured.stat.exists
 
 - name: configure/symlink wp-config.php
   file: src=/etc/wordpress/wp-config.php dest=/usr/local/share/wordpress/{{ wp_version }}/wp-config.php state=link
+  notify: reload apache
   become: yes
-  when: not wp_configured.stat.exists
+#  when: not wp_configured.stat.exists
 
-#
-# Cleanup.
-#
-
-- name: remove sites-enabled/000-default.conf
-  file: path={{apache_config_path}}/sites-enabled/000-default.conf state=absent
-  become: yes
-- name: remove sites-available/000-default.conf
-  file: path={{apache_config_path}}/sites-available/000-default.conf state=absent
-  become: yes
-
-#
-# Glue.
-#
-
-#- name: fix permissions to /usr/local/share/wordpress
-#  blockinfile:
-#    dest: "{{apache_config_path}}/{{apache_config_file}}"
-#    insertafter: "^#<Directory /srv/>((?:.|\n)*?)</Directory>\s+$"
-#    block: |
-#      <Directory /usr/local/share/wordpress>
-#          Options Indexes FollowSymLinks
-#          AllowOverride None
-#          Require all granted
-#      </Directory>
-#  become: yes
-
-- name: copy default-ssl.conf in sites-available
-  template: src="apache-default-ssl-{{ ansible_os_family }}.conf.j2" dest="{{apache_config_path}}/sites-available/default-ssl.conf" force=yes
-  become: yes
-  when: not wp_configured.stat.exists
-- name: create sites-enabled symlink for default-ssl.conf
-  file: src=../sites-available/default-ssl.conf dest={{apache_config_path}}/sites-enabled/default-ssl.conf
-  become: yes
-  notify:
-    - reload apache
-  when: not wp_configured.stat.exists

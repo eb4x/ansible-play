@@ -2,6 +2,6 @@
 apache_package_name: httpd
 apache_service_name: httpd
 
-# Oh, I completely forgot how much apache configuration sucks on RedHat systems.
-apache_site_path: /etc/httpd/conf.d
-apache_default_ssl: ssl.conf
+# Should only be used after converting httpd to deb-style.
+apache_config_path: /etc/httpd
+apache_site_path: /etc/httpd/sites-available

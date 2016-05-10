@@ -2,5 +2,5 @@
 apache_package_name: apache2
 apache_service_name: apache2
 
-apache_site_path: /etc/apache2/sites-available/
-apache_default_ssl: default-ssl.conf
+apache_config_path: /etc/apache2
+apache_site_path: /etc/apache2/sites-available
