@@ -1,7 +1,5 @@
 ---
 
-- include_vars: "{{ ansible_os_family }}.yml"
-
 - name: json wordpress version check
   action: "uri url=https://api.wordpress.org/core/version-check/1.7/ return_content=yes"
   register: wp_response
@@ -9,13 +7,17 @@
 - name: check that wp_version is defined
   assert: { that: wp_version is defined }
 
-- name: "check if wordpress/{{wp_version}}/wp-config.php is symlinked"
-  stat: path=/usr/local/share/wordpress/{{ wp_version }}/wp-config.php
-  register: wp_configured
-
-- name: check /etc/wordpress
+- name: "check /etc/wordpress"
   file: path=/etc/wordpress state=directory
   become: yes
+
+- name: "check /usr/local/share/wordpress/{{ wp_version }}"
+  file: path=/usr/local/share/wordpress/{{ wp_version }} state=directory owner=root group=root mode=0755 setype=httpd_sys_content_t
+  become: yes
+
+- name: "check /usr/local/share/wordpress/{{wp_version}}/wp-config.php is symlinked"
+  stat: path=/usr/local/share/wordpress/{{ wp_version }}/wp-config.php
+  register: wp_configured
 
 - name: copy apache-client config
   template: src=apache-wp-client.conf.j2 dest=/etc/wordpress/apache-wp-client.conf
@@ -32,10 +34,6 @@
   become: yes
   when: not wp_configured.stat.exists
 
-- name: "check /usr/local/share/wordpress/{{ wp_version }}"
-  file: path=/usr/local/share/wordpress/{{ wp_version }} state=directory owner=root group=root mode=0755 setype=httpd_sys_content_t
-  become: yes
-
 - name: download and extract wordpress
   become: yes
   shell: wget https://downloads.wordpress.org/release/wordpress-{{ wp_version }}.tar.gz -O - | tar -C /usr/local/share/wordpress/{{ wp_version }} --strip=1 -xzf - warn=false
@@ -46,5 +44,5 @@
   file: src=/etc/wordpress/wp-config.php dest=/usr/local/share/wordpress/{{ wp_version }}/wp-config.php state=link
   notify: reload apache
   become: yes
-#  when: not wp_configured.stat.exists
+  when: not wp_configured.stat.exists
 

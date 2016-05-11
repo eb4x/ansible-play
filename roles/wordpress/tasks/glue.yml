@@ -36,6 +36,7 @@
 
 - name: create sites-enabled symlink for default-ssl.conf
   file: src=../sites-available/default-ssl.conf dest={{apache_config_path}}/sites-enabled/default-ssl.conf
+  notify: reload apache
   become: yes
   when: not wp_apache_enabled.stat.exists
 
