@@ -10,29 +10,16 @@
   service: name=httpd state=stopped
   become: yes
 
-- name: check conf-available directory
-  file: path=/etc/httpd/conf-available state=directory
+- name: check directories
+  file: path={{ item }} state=directory
   become: yes
-
-- name: check conf-enabled directory
-  file: path=/etc/httpd/conf-enabled state=directory
-  become: yes
-
-- name: check mods-available directory
-  file: path=/etc/httpd/mods-available state=directory
-  become: yes
-
-- name: check mods-enabled directory
-  file: path=/etc/httpd/mods-enabled state=directory
-  become: yes
-
-- name: check sites-available directory
-  file: path=/etc/httpd/sites-available state=directory
-  become: yes
-
-- name: check sites-enabled directory
-  file: path=/etc/httpd/sites-enabled state=directory
-  become: yes
+  with_items:
+    - /etc/httpd/conf-available
+    - /etc/httpd/conf-enabled
+    - /etc/httpd/mods-available
+    - /etc/httpd/mods-enabled
+    - /etc/httpd/sites-available
+    - /etc/httpd/sites-enabled
 
 - name: check /var/lock/httpd directory
   file: path=/var/lock/httpd state=directory owner=apache group=apache
