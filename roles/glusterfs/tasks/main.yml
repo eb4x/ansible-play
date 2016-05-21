@@ -1,0 +1,18 @@
+---
+
+- include: "{{ item }}"
+  with_first_found:
+    - "{{ansible_distribution}}.yml"
+    - "{{ansible_os_family}}.yml"
+
+# XXX BUG: with_first_found looks first for files in tasks/.
+# Luckily I can get away without using it.
+- include_vars: "{{ ansible_os_family }}.yml"
+
+- name: install glusterfs-client
+  package: "name={{ glusterfs_client }} state=latest"
+  become: yes
+
+- name: install glusterfs-server
+  package: "name={{ glusterfs_server }} state=latest"
+  become: yes

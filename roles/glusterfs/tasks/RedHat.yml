@@ -1,0 +1,12 @@
+---
+#- vars:
+#    glusterfs_client: glusterfs
+#    glusterfs_server: glusterfs-server
+
+- name: add gluster key
+  rpm_key: key="http://download.gluster.org/pub/gluster/glusterfs/3.7/LATEST/rsa.pub" state=present
+  become: yes
+
+- name: add gluster repo
+  get_url: url="http://download.gluster.org/pub/gluster/glusterfs/3.7/LATEST/RHEL/glusterfs-epel.repo" dest="/etc/yum.repos.d/glusterfs-epel.repo" mode="0644"
+  become: yes

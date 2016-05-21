@@ -1,0 +1,8 @@
+---
+#- vars:
+#    glusterfs_client: glusterfs-client
+#    glusterfs_server: glusterfs-server
+
+- name: add gluster ppa
+  apt_repository: repo="ppa:gluster/glusterfs-3.7"
+  become: yes

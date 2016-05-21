@@ -1,0 +1,12 @@
+---
+#- vars:
+#    glusterfs_client: glusterfs-client
+#    glusterfs_server: glusterfs-server
+
+- name: add gluster key
+  apt_key: url="http://download.gluster.org/pub/gluster/glusterfs/3.7/LATEST/rsa.pub" state=present
+  become: yes
+
+- name: add gluster repo
+  apt_repository: repo="deb http://download.gluster.org/pub/gluster/glusterfs/3.7/LATEST/Debian/jessie/apt jessie main" state=present filename="gluster" mode="0644"
+  become: yes
