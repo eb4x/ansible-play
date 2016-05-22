@@ -36,7 +36,7 @@
   when: not wp_apache_available.stat.exists
 
 - name: "wordpress : glue : create sites-enabled symlink for default-ssl.conf"
-  file: src=../sites-available/default-ssl.conf dest={{apache_config_path}}/sites-enabled/default-ssl.conf
+  file: src=../sites-available/default-ssl.conf dest={{apache_config_path}}/sites-enabled/default-ssl.conf state=link
   notify: reload apache
   become: yes
   when: not wp_apache_enabled.stat.exists

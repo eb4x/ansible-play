@@ -2,5 +2,7 @@
 
 - name: "apache : enable rewrite module"
   apache2_module: name=rewrite state=present
+  become: yes
 - name: "apache : enable ssl module"
   apache2_module: name=ssl state=present
+  become: yes
