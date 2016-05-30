@@ -5,9 +5,9 @@
   become: yes
   package: "name={{ apache_package_name }} state=latest"
 
-- name: run apache
+- name: start apache service
   become: yes
-  service: "name={{apache_service_name}} state=started enabled=yes"
+  service: "name={{ apache_service_name }} state=started enabled=yes"
 
 # XXX Wouldn't it be nice to do this here.
 # Initial steps to convert httpd to a debian-esque style configuration.
