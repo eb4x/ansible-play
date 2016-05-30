@@ -1,0 +1,13 @@
+---
+
+- name:  add neurodebian key
+  apt_key: keyserver="pgp.mit.edu" id="0xA5D32F012649A5A9"
+  become: yes
+
+- name: add neurodebian data repo
+  apt_repository: repo="deb http://neuro.debian.net/debian data main" filename="neurodebian" mode="0644"
+  become: yes
+
+- name: add neurodebian jessie repo
+  apt_repository: repo="deb http://neuro.debian.net/debian jessie main" filename="neurodebian" mode="0644"
+  become: yes

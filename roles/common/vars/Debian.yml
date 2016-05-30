@@ -1,2 +1,4 @@
 ---
 httplib2_package_name: python-httplib2
+fail2ban_package_name: fail2ban
+fail2ban_service_name: fail2ban
