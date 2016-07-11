@@ -2,3 +2,4 @@
 
 glusterfs_client: glusterfs-client
 glusterfs_server: glusterfs-server
+glusterfs_service: glusterfs-server
