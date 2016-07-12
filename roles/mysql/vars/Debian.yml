@@ -1,3 +1,6 @@
 ---
-mysql_package_name: mysql-server
-mysql_service_name: mysql-server
+
+mysql_server: "mysql-server"
+mysql_service: "mysql-server"
+mysql_python: "python-mysqldb"
+
