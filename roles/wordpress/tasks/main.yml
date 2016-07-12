@@ -8,41 +8,33 @@
   assert: { that: wp_version is defined }
 
 - name: "check /etc/wordpress"
-  file: path=/etc/wordpress state=directory
+  file: path=/etc/wordpress state=directory owner=root group=root mode=0755
   become: yes
+
+- name: "copy /etc/wordpress config"
+  template: src={{ item.src }} dest=/etc/wordpress/{{ item.dest }}
+  become: yes
+  with_items:
+    - { src: "apache-wp-client.conf.j2", dest: "apache-wp-client.conf" }
+    - { src: "apache-wp-shared.conf.j2", dest: "apache-wp-shared.conf" }
+    - { src: "wp-config.php.j2",         dest: "wp-config.php"         }
 
 - name: "check /usr/local/share/wordpress/{{ wp_version }}"
   file: path=/usr/local/share/wordpress/{{ wp_version }} state=directory owner=root group=root mode=0755 setype=httpd_sys_content_t
   become: yes
 
-- name: "check /usr/local/share/wordpress/{{wp_version}}/wp-config.php is symlinked"
+- name: "check /usr/local/share/wordpress/{{ wp_version }}/wp-config.php is symlinked"
   stat: path=/usr/local/share/wordpress/{{ wp_version }}/wp-config.php
   register: wp_configured
 
-- name: copy apache-client config
-  template: src=apache-wp-client.conf.j2 dest=/etc/wordpress/apache-wp-client.conf
-  become: yes
-  when: not wp_configured.stat.exists
-
-- name: copy apache-shared config
-  template: src=apache-wp-shared.conf.j2 dest=/etc/wordpress/apache-wp-shared.conf
-  become: yes
-  when: not wp_configured.stat.exists
-
-- name: copy wp-config.php
-  template: src=wp-config.php.j2 dest=/etc/wordpress/wp-config.php
-  become: yes
-  when: not wp_configured.stat.exists
-
 - name: download and extract wordpress
-  become: yes
   shell: wget https://downloads.wordpress.org/release/wordpress-{{ wp_version }}.tar.gz -O - | tar -C /usr/local/share/wordpress/{{ wp_version }} --strip=1 -xzf - warn=false
-#  unarchive: src=https://downloads.wordpress.org/release/wordpress-{{ wp_version }}.tar.gz dest=/usr/local/share/wordpress/{{ wp_version }} copy=no
+  become: yes
   when: not wp_configured.stat.exists
 
 - name: configure/symlink wp-config.php
   file: src=/etc/wordpress/wp-config.php dest=/usr/local/share/wordpress/{{ wp_version }}/wp-config.php state=link
-  notify: reload apache
   become: yes
+  notify: service apache reload
   when: not wp_configured.stat.exists
 

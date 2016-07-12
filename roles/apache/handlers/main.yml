@@ -1,5 +1,6 @@
 ---
 
-- name: reload apache service
-  service: name={{apache_service_name}} state=reloaded
+- name: service apache reload
+  service: name={{ apache_service_name }} state=reloaded
   become: yes
+

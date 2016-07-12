@@ -1,43 +1,29 @@
 ---
-- name: "wordpress : glue : include_vars {{ ansible_os_family }}"
+
+- name: "wordpress : glue : include_vars"
   include_vars: "roles/apache/vars/{{ ansible_os_family }}.yml"
 
 #
 # Cleanup.
 #
 
-- name: "wordpress : glue : remove sites-enabled/000-default.conf"
-  file: path={{apache_config_path}}/sites-enabled/000-default.conf state=absent
+- name: "wordpress : glue : remove sites-*/000-default.conf"
+  file: path={{ item }} state=absent
   become: yes
-- name: "wordpress : glue : remove sites-available/000-default.conf"
-  file: path={{apache_config_path}}/sites-available/000-default.conf state=absent
-  become: yes
-
-#
-# Checks and variables.
-#
-
-- name: "wordpress : glue : check if sites-available/default-ssl.conf is present"
-  stat: path={{apache_site_path}}/sites-available/default-ssl.conf 
-  register: wp_apache_available
-
-- name: "wordpress : glue : check if sites-enabled/default-ssl.conf is present"
-  stat: path={{apache_site_path}}/sites-available/default-ssl.conf 
-  register: wp_apache_enabled
-
+  with_items:
+    - "{{ apache_config_path }}/sites-available/000-default.conf"
+    - "{{ apache_config_path }}/sites-enabled/000-default.conf"
 
 #
 # Glue.
 #
 
 - name: "wordpress : glue : copy default-ssl.conf to sites-available"
-  template: src="roles/wordpress/templates/apache-default-ssl-{{ ansible_os_family }}.conf.j2" dest="{{apache_config_path}}/sites-available/default-ssl.conf"
+  template: src="roles/wordpress/templates/apache-default-ssl-{{ ansible_os_family }}.conf.j2" dest="{{ apache_config_path }}/sites-available/default-ssl.conf"
   become: yes
-  when: not wp_apache_available.stat.exists
 
 - name: "wordpress : glue : create sites-enabled symlink for default-ssl.conf"
-  file: src=../sites-available/default-ssl.conf dest={{apache_config_path}}/sites-enabled/default-ssl.conf state=link
-  notify: reload apache
+  file: src=../sites-available/default-ssl.conf dest={{ apache_config_path }}/sites-enabled/default-ssl.conf state=link
   become: yes
-  when: not wp_apache_enabled.stat.exists
+#  notify: service apache reload
 
