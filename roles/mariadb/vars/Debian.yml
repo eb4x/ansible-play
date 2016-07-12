@@ -1,5 +1,8 @@
 ---
-mariadb_package_name: mariadb-server
-mariadb_service_name: mysql
 
-mariadb_config_file: /etc/mysql/my.cnf
+mariadb_server: "mariadb-server"
+mariadb_service: "mysql"
+mysql_python: "python-mysqldb"
+
+mariadb_config_file: "/etc/mysql/my.cnf"
+
