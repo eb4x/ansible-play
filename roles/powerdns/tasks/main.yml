@@ -1,0 +1,70 @@
+---
+
+- name: "pre-task; add powerdns repo based on distro"
+  include: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family }}.yml"
+
+- include_vars: "{{ item }}"
+  with_items:
+    - "{{ ansible_os_family }}.yml"
+    - "secrets.yml"
+
+- name: install powerdns packages
+  package: "name={{ item }} state=latest"
+  become: yes
+  with_items:
+    - "{{ powerdns_server }}"
+    - "{{ powerdns_backend }}"
+
+- name: check pdns.d directory
+  file: path="{{ powerdns_config_dir }}/pdns.d" state=directory
+  become: yes
+
+- name: default config
+  template: src={{ item.src }} dest={{ powerdns_config_dir }}/{{ item.dest }}
+  become: yes
+  with_items:
+    - { src: "pdns.conf.j2",       dest: "pdns.conf"              }
+    - { src: "pdns.mysql.conf.j2", dest: "pdns.d/pdns.mysql.conf" }
+
+- name: remove crud
+  file: path={{ item }} state=absent
+  become: yes
+  with_items:
+    - "{{ powerdns_config_dir }}/bindbackend.conf"
+    - "{{ powerdns_config_dir }}/pdns.d/pdns.local.conf"
+    - "{{ powerdns_config_dir }}/pdns.d/pdns.simplebind.conf"
+
+#- name: mysql drop database
+#  mysql_db: login_user=root name=powerdns state=absent
+#  become: yes
+
+- name: mysql create database
+  mysql_db: login_user=root name=powerdns state=present
+  become: yes
+  register: db
+
+- name: copy schema
+  copy: src=mysql.sql dest=/tmp/powerdns.mysql.sql
+  when: db.changed == true
+
+- name: mysql import schema
+  mysql_db: login_user=root name=powerdns state=import target=/tmp/powerdns.mysql.sql
+  become: yes
+  when: db.changed == true
+
+- name: mysql user
+  mysql_user: login_user=root name=powerdns password={{ mysql_powerdns_password }} priv="powerdns.*:ALL"
+  become: yes
+
+- name: service powerdns start
+  service: "name={{ powerdns_service }} state=started enabled=yes"
+  become: yes
+
+- name: update firewall
+  firewalld: service=dns state=enabled permanent=yes immediate=yes
+  become: yes
+  when: ansible_os_family == 'RedHat'
+

@@ -1,0 +1,15 @@
+---
+
+- name: add powerdns key
+  apt_key: url="https://repo.powerdns.com/FD380FBB-pub.asc" state=present
+  become: yes
+
+- name: add powerdns repo
+  apt_repository: repo="{{ line }}" state=present filename="powerdns" mode="0644"
+  become: yes
+  with_items:
+    - "deb http://repo.powerdns.com/ubuntu xenial-auth-40 main"
+    - "deb http://repo.powerdns.com/ubuntu xenial-rec-40 main"
+    - "deb http://repo.powerdns.com/ubuntu xenial-dnsdist-10 main"
+  loop_control:
+    loop_var: line

@@ -1,0 +1,8 @@
+---
+
+powerdns_server: "pdns"
+powerdns_backend: [ "pdns-backend-mysql", "pdns-backend-postgresql" ]
+powerdns_service: "pdns"
+powerdns_config_dir: "/etc/pdns"
+powerdns_config_file: "/etc/pdns/pdns.conf"
+

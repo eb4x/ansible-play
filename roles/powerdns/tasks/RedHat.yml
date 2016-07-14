@@ -1,0 +1,21 @@
+---
+
+  # PowerDNS wants EPEL and yum-priority-plugin
+- name: install powerdns dependencies
+  package: name="{{ package }}" state=latest
+  become: yes
+  with_items:
+    - "epel-release"
+    - "yum-plugin-priorities"
+  loop_control:
+    loop_var: package
+
+- name: add powerdns repos
+  get_url: url="{{ repo.url }}" dest="/etc/yum.repos.d/{{ repo.filename }}" mode="0644"
+  become: yes
+  with_items:
+    - { url: "https://repo.powerdns.com/repo-files/centos-auth-40.repo",    filename: "powerdns-auth-40.repo"    }
+    - { url: "https://repo.powerdns.com/repo-files/centos-rec-40.repo",     filename: "powerdns-rec-40.repo"     }
+    - { url: "https://repo.powerdns.com/repo-files/centos-dnsdist-10.repo", filename: "powerdns-dnsdist-10.repo" }
+  loop_control:
+    loop_var: repo
