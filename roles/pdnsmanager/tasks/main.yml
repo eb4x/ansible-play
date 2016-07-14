@@ -1,0 +1,45 @@
+---
+
+- include_vars: "{{ item }}"
+  with_items:
+    - "../../apache/vars/{{ ansible_os_family }}.yml"
+    - "secrets.yml"
+    - "version.yml"
+
+- name: check for pdnsmanager-{{ pdnsmanager_version }} installation
+  file: path=/usr/local/share/pdnsmanager/{{ pdnsmanager_version }} state=directory owner=root group=root mode=0755 setype=httpd_sys_content_t
+  become: yes
+  register: res
+
+- name: download and install pdnsmanager-{{ pdnsmanager_version }}
+  unarchive: src=https://pdnsmanager.lmitsystems.de/files/pdns-manager-{{ pdnsmanager_version }}.tar.gz dest=/usr/local/share/pdnsmanager/{{ pdnsmanager_version }} copy=no
+  become: yes
+  when: res.changed == true
+
+- name: configure pdnsmanager-{{ pdnsmanager_version }} installation
+  template: src=config-user.php.j2 dest=/usr/local/share/pdnsmanager/{{ pdnsmanager_version }}/config/config-user.php
+  become: yes
+
+- name: copy apache.conf to conf-available/pdnsmanager.conf
+  template: src=apache.conf.j2 dest={{ apache_conf_dir }}/conf-available/pdnsmanager.conf
+  become: yes
+
+- name: create conf-enabled symlink for conf-available/pdnsmanager.conf
+  file: src=../conf-available/pdnsmanager.conf dest={{ apache_conf_dir }}/conf-enabled/pdnsmanager.conf state=link
+  become: yes
+#  notify: service apache reload
+
+- name: create mysql user
+  mysql_user: login_user=root name=pdnsmanager password={{ mysql_pdnsmanager_password }} priv="powerdns.*:ALL"
+  become: yes
+  register: db
+
+- name: transfer mysql schema
+  copy: src=pdnsmanager.sql dest=/tmp/pdnsmanager.sql
+  when: db.changed == true
+
+- name: import mysql schema
+  mysql_db: login_user=root name=powerdns state=import target=/tmp/pdnsmanager.sql
+  become: yes
+  when: db.changed == true
+
