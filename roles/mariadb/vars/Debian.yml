@@ -1,8 +1,21 @@
 ---
 
-mariadb_server: "mariadb-server"
-mariadb_service: "mysql"
+mariadb_server:
+  - "mariadb-server"
+  - "mariadb-common"
 mysql_python: "python-mysqldb"
 
-mariadb_config_file: "/etc/mysql/my.cnf"
+mariadb_service: "mysql"
+
+mariadb_cnf: "/etc/mysql/my.cnf"
+mariadb_cnf_dir: "/etc/mysql"
+mariadb_inc_dir: "/etc/mysql/conf.d"
+
+mariadb_log_dir: "/var/log/mysql"
+mariadb_run_dir: "/var/run/mysqld"
+
+mariadb_crud:
+  - "{{ mariadb_inc_dir }}/mariadb.cnf"
+  - "{{ mariadb_inc_dir }}/mysqld_safe_syslog.cnf"
+  - "{{ mariadb_inc_dir }}/tokudb.cnf"
 

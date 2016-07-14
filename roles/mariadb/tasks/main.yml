@@ -2,14 +2,42 @@
 
 - include_vars: "{{ ansible_os_family }}.yml"
 
-- name: install mariadb packages
+- name: "install mariadb packages"
   package: "name={{ item }} state=latest"
   become: yes
   with_items:
     - "{{ mariadb_server }}"
     - "{{ mysql_python }}"
 
-- name: service mariadb-server start
+- name: "check if my.cnf is a symlink"
+  stat: path={{ mariadb_cnf }}
+  register: res
+
+- name: "remove said my.cnf symlink"
+  file: path={{ mariadb_cnf }} state=absent
+  become: yes
+  when: res.stat.islnk == true
+
+- name: remove crud
+  file: path={{ item }} state=absent
+  become: yes
+  with_items:
+    - "{{ mariadb_crud }}"
+    - "{{ mariadb_cnf_dir }}/my.cnf.fallback"
+    - "{{ mariadb_inc_dir }}/mysql.cnf"
+    - "{{ mariadb_inc_dir }}/mysqldump.cnf"
+
+- name: "copy sane my.cnf"
+  template: "src=my.cnf.j2 dest={{ mariadb_cnf }}"
+  become: yes
+  register: res
+
+- name: "service mariadb-server restart"
+  service: "name={{ mariadb_service }} state=restarted"
+  become: yes
+  when: res.changed == true
+
+- name: "service mariadb-server start"
   service: "name={{ mariadb_service }} state=started enabled=yes"
   become: yes
 

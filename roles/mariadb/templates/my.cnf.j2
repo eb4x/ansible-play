@@ -1,0 +1,216 @@
+#
+# The MariaDB configuration file.
+#
+
+# You can copy this to one of:
+# - "/etc/mysql/my.cnf" to set global options,
+# - "~/.my.cnf" to set user-specific options.
+# 
+# One can use all long options that the program supports.
+# Run program with --help to get a list of available options and with
+# --print-defaults to see which it would actually understand and use.
+#
+# For explanations see
+# http://dev.mysql.com/doc/mysql/en/server-system-variables.html
+
+# this is read by the standalone daemon and embedded servers
+[server]
+
+# This will be passed to all mysql clients
+# It has been reported that passwords should be enclosed with ticks/quotes
+# escpecially if they contain "#" chars...
+# Remember to edit /etc/mysql/debian.cnf when changing the socket location.
+[client]
+port = 3306
+socket = {{ mariadb_run_dir }}/mysqld.sock
+default-character-set = utf8 
+
+# This was formally known as [safe_mysqld]. Both versions are currently parsed.
+[mysqld_safe]
+socket = {{ mariadb_run_dir }}/mysqld.sock
+nice = 0
+
+[mysqld]
+
+#
+# * Basic Settings
+#
+default-storage-engine = innodb
+lower-case-table-names = 1
+transaction-isolation = READ-COMMITTED
+#explicit-defaults-for-timestamp = true
+
+user     = mysql
+pid-file = {{ mariadb_run_dir }}/mysqld.pid
+socket   = {{ mariadb_run_dir }}/mysqld.sock
+port     = 3306
+basedir  = /usr
+datadir  = /var/lib/mysql
+tmpdir   = /tmp
+lc-messages-dir	= /usr/share/mysql
+skip-external-locking
+
+# Instead of skip-networking the default is now to listen only on
+# localhost which is more compatible and is not less secure.
+bind-address = 127.0.0.1
+#
+# * Fine Tuning
+#
+key-buffer-size = 16M
+max-allowed-packet = 1024M
+
+thread-cache-size = 8
+thread-stack = 256K
+#thread-concurrency = 10
+
+table-definition-cache = 64
+table-open-cache = 2048
+
+# The maximum size of internal in-memory temporary tables.
+# (The actual limit is determined as the minimum of tmp_table_size and max_heap_table_size.)
+tmp-table-size      = 32M
+max-heap-table-size = 32M
+
+#max-connections = 100
+
+# The effective open_files_limit value is based on the value specified at system startup
+# and the values of max_connections and table_open_cache
+#open-files-limit = 65535
+
+# This replaces the startup script and checks MyISAM tables if needed
+# the first time they are touched
+myisam-recover-options = FORCE,BACKUP
+
+#
+# * Query Cache Configuration
+#
+query-cache-type  = 0
+query-cache-size  = 0
+#query-cache-limit = 1M
+#
+# * Logging and Replication
+#
+# Both location gets rotated by the cronjob.
+# Be aware that this log type is a performance killer.
+# As of 5.1 you can enable the log at runtime!
+general-log             = 1
+general-log-file        = {{ mariadb_log_dir }}/mysql.log
+#
+# Error log - should be very few entries.
+#
+log-error = {{ mariadb_log_dir }}/error.log
+
+# Enable the slow query log to see queries with especially long duration
+slow-query-log = 1
+slow-query-log-file = {{ mariadb_log_dir }}/mysql-slow.log
+log-queries-not-using-indexes = 1
+#long_query_time = 10
+#log_slow_rate_limit	= 1000
+#log_slow_verbosity	= query_plan
+
+# The following can be used as easy to replay backup logs or for replication.
+# note: if you are setting up a replication slave, see README.Debian about
+#       other settings you may need to change.
+#server-id                = 1
+#auto-increment-offset    = 1
+#auto-increment-increment = 4
+
+# In a 3-way, you'd want to inform the slave-nodes you're a master for,
+# to update whenever you recieve data from a master node you're a slave to.
+# In a master-master setup, your slave already knows.
+#log-slave-updates = 1
+#replicate-same-server-id = 0
+
+log-bin         = {{ mariadb_log_dir }}/mysql-bin.log
+log-bin-index   = {{ mariadb_log_dir }}/mysql-bin.idx
+max-binlog-size = 100M
+
+# 0 = trust OS to write data,
+# 10 = call fdatasync for every 10 transaction commits.
+sync-binlog = 0
+
+relay-log          = {{ mariadb_log_dir }}/{{ ansible_hostname }}-relay-bin.log
+relay-log-index    = {{ mariadb_log_dir }}/{{ ansible_hostname }}-relay-bin.idx
+max-relay-log-size = 1024M
+
+expire-logs-days = 10
+#binlog-checksum = NONE
+binlog-format = mixed
+
+# Logging all changes, you can recover any of the dbs from a binlog.
+# Use replicate-*-db filters than binlog-*-db filters.
+#binlog_do_db     = include_database_name
+#binlog_ignore_db = include_database_name
+
+skip-slave-start = false
+#slave-skip-errors = 1062
+report-host = {{ ansible_hostname }}
+#
+# * InnoDB
+#
+# InnoDB is enabled by default with a 10MB datafile in /var/lib/mysql/.
+# Read the manual for more InnoDB related options. There are many!
+#
+innodb-buffer-pool-size = 1G
+innodb-file-per-table = true
+innodb-flush-log-at-trx-commit = 1
+#innodb-flush-method = O_DIRECT
+#innodb-log-file-size = 256M
+innodb-strict-mode = 1
+
+#
+# * Security Features
+#
+# Read the manual, too, if you want chroot!
+# chroot = /var/lib/mysql/
+#
+# For generating SSL certificates I recommend the OpenSSL GUI "tinyca".
+#
+# ssl-ca=/etc/mysql/cacert.pem
+# ssl-cert=/etc/mysql/server-cert.pem
+# ssl-key=/etc/mysql/server-key.pem
+
+#
+# * Character sets
+#
+# MySQL/MariaDB default is Latin1, but in Debian we rather default to the full
+# utf8 4-byte character set. See also client.cnf
+#
+character-set-server  = utf8mb4
+collation-server      = utf8mb4_general_ci
+
+# This group is only read by MariaDB-5.5 servers.
+# # If you use the same .cnf file for MariaDB of different versions,
+# # use this group for options that older servers don't understand
+#[mysqld-5.5]
+
+# # These groups are only read by MariaDB servers, not by MySQL.
+# # If you use the same .cnf file for MySQL and MariaDB,
+# # you can put MariaDB-only options here
+[mariadb]
+
+[mariadb-5.5]
+
+[mariadb-10.0]
+
+[mysqldump]
+quick
+single-transaction
+master-data
+quote-names
+max-allowed-packet = 1024M
+
+# this is only for embedded server
+[embedded]
+
+[mysql]
+#no-auto-rehash	# faster start of mysql but no tab completition
+
+[isamchk]
+key-buffer = 16M
+
+#
+# * IMPORTANT: Additional settings that can override those from this file!
+#   The files must end with '.cnf', otherwise they'll be ignored.
+#
+!includedir {{ mariadb_inc_dir }}/

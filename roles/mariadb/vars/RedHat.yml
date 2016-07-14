@@ -1,8 +1,21 @@
 ---
 
-mariadb_server: "mariadb-server"
-mariadb_service: "mariadb"
+mariadb_server:
+  - "mariadb-server"
+  - "mariadb-libs"
 mysql_python: "MySQL-python"
 
-mariadb_config_file: "/etc/my.cnf"
+mariadb_service: "mariadb"
+
+mariadb_cnf: "/etc/my.cnf"
+mariadb_cnf_dir: "/etc"
+mariadb_inc_dir: "/etc/my.cnf.d"
+
+mariadb_log_dir: "/var/log/mariadb"
+mariadb_run_dir: "/var/run/mariadb"
+
+mariadb_crud:
+  - "{{ mariadb_inc_dir }}/client.cnf"
+  - "{{ mariadb_inc_dir }}/mysql-clients.cnf"
+  - "{{ mariadb_inc_dir }}/server.cnf"
 
