@@ -1,3 +1,6 @@
 ---
-php_package_name: php7.0
-php_mysql_package_name: php7.0-mysql
+
+php: [ "php7.0", "libapache2-mod-php7.0" ]
+php_mysql: "php7.0-mysql"
+php_apache_mod: "php7.0"
+

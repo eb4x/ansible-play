@@ -1,0 +1,6 @@
+---
+
+- name: "apache : enable php module"
+  apache2_module: name={{ php_apache_mod }} state=present
+  become: yes
+

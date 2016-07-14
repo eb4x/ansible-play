@@ -1,0 +1,8 @@
+---
+
+# BUG: a2enmod php7.0 gives a warning,
+# and ansible treats it as an error.
+- name: "apache : enable php module"
+  command: "a2enmod {{ php_apache_mod }}"
+  become: yes
+

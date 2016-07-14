@@ -1,14 +1,34 @@
 ---
-- include_vars: "{{ item }}"
+
+# BUG! https://github.com/ansible/ansible/issues/14857 ,
+#      https://github.com/ansible/ansible/issues/14454 ,
+#      https://github.com/ansible/ansible/pull/16630
+
+#- include_vars: "{{ item }}"
+#  with_first_found:
+#    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version | int }}.yml"
+#    - "{{ ansible_distribution }}.yml"
+#    - "{{ ansible_os_family }}.yml"
+
+- include_vars: "Debian.yml"
+  when: ansible_distribution == 'Debian'
+- include_vars: "Ubuntu-16.yml"
+  when: ansible_distribution == 'Ubuntu'
+- include_vars: "RedHat.yml"
+  when: ansible_os_family == 'RedHat'
+
+- name: install php packages
+  package: "name={{ item }} state=latest"
+  become: yes
+  with_items:
+    - "{{ php }}"
+    - "{{ php_mysql }}"
+
+# BUG: a2enmod php7.0 gives a warning,
+# and ansible treats it as an error.
+- name: "post-task; fix/enable stuff"
+  include: "{{ item }}"
   with_first_found:
-    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version | int }}.yml"
     - "{{ ansible_distribution }}.yml"
     - "{{ ansible_os_family }}.yml"
 
-- name: install php
-  become: yes
-  package: "name={{php_package_name}} state=latest"
-
-- name: install php-mysql
-  become: yes
-  package: "name={{php_mysql_package_name}} state=latest"

@@ -1,3 +1,6 @@
 ---
-php_package_name: php
-php_mysql_package_name: php-mysqlnd
+
+php: "php"
+php_mysql: "php-mysqlnd"
+php_apache_mod: "php"
+
