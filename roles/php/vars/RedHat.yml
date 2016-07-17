@@ -4,3 +4,7 @@ php: "php"
 php_mysql: "php-mysqlnd"
 php_apache_mod: "php"
 
+files_to_move:
+  - { src: "{{ apache_conf_dir }}/conf.d/php.conf",            dest: "{{ apache_conf_dir }}/mods-available/php.conf" }
+  - { src: "{{ apache_conf_dir }}/conf.modules.d/10-php.conf", dest: "{{ apache_conf_dir }}/mods-available/php.load" }
+

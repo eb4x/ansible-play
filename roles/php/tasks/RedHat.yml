@@ -1,5 +1,26 @@
 ---
 
-- name: do nothing
-  shell: echo "Hello world!"
+- name: stat files to move
+  stat: "path={{ file.src }}"
+  register: files
+  with_items: "{{ files_to_move }}"
+  loop_control:
+    loop_var: file
+
+- name: move files
+  command: "mv {{ file.item.src }} {{ file.item.dest }}"
+  become: yes
+  when: file.stat.exists == True
+  with_items: "{{ files.results }}"
+  loop_control:
+    loop_var: file
+
+- name: files to symlink
+  file: src=../mods-available/{{ file }} dest={{ apache_conf_dir }}/mods-enabled/{{ file }} state=link
+  become: yes
+  with_items:
+    - "php.conf"
+    - "php.load"
+  loop_control:
+    loop_var: file
 
