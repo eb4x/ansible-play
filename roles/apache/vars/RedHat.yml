@@ -1,7 +1,51 @@
 ---
+
 apache_package_name: httpd
 apache_service_name: httpd
 
-# Should only be used after converting httpd to deb-style.
-apache_config_path: /etc/httpd
-apache_site_path: /etc/httpd/sites-available
+apache_conf_dir: /etc/httpd
+apache_site_dir: /etc/httpd/sites-available
+
+files_to_copy:
+  - { src: "httpd.conf",                                dest: "{{ apache_conf_dir }}/httpd.conf"                                }
+  - { src: "ports.conf",                                dest: "{{ apache_conf_dir }}/ports.conf"                                }
+  - { src: "conf-available/charset.conf",               dest: "{{ apache_conf_dir }}/conf-available/charset.conf"               }
+  - { src: "conf-available/localized-error-pages.conf", dest: "{{ apache_conf_dir }}/conf-available/localized-error-pages.conf" }
+  - { src: "mods-available/alias.conf",                 dest: "{{ apache_conf_dir }}/mods-available/alias.conf"                 }
+  - { src: "mods-available/dir.conf",                   dest: "{{ apache_conf_dir }}/mods-available/dir.conf"                   }
+  - { src: "mods-available/mime.conf",                  dest: "{{ apache_conf_dir }}/mods-available/mime.conf"                  }
+  - { src: "mods-available/mime_magic.conf",            dest: "{{ apache_conf_dir }}/mods-available/mime_magic.conf"            }
+
+files_to_move:
+  - { src: "{{ apache_conf_dir }}/conf/magic",                       dest: "{{ apache_conf_dir }}/magic"                         }
+  - { src: "{{ apache_conf_dir }}/conf.d/autoindex.conf",            dest: "{{ apache_conf_dir }}/mods-available/autoindex.conf" }
+  - { src: "{{ apache_conf_dir }}/conf.d/mod_dnssd.conf",            dest: "{{ apache_conf_dir }}/mods-available/dnssd.conf"     }
+  - { src: "{{ apache_conf_dir }}/conf.d/ssl.conf",                  dest: "{{ apache_conf_dir }}/mods-available/ssl.conf"       }
+  - { src: "{{ apache_conf_dir }}/conf.d/userdir.conf",              dest: "{{ apache_conf_dir }}/mods-available/userdir.conf"   }
+  - { src: "{{ apache_conf_dir }}/conf.d/welcome.conf",              dest: "{{ apache_conf_dir }}/conf-available/welcome.conf"   }
+  - { src: "{{ apache_conf_dir }}/conf.modules.d/00-dav.conf",       dest: "{{ apache_conf_dir }}/mods-available/dav.load"       }
+  - { src: "{{ apache_conf_dir }}/conf.modules.d/00-lua.conf",       dest: "{{ apache_conf_dir }}/mods-available/lua.load"       }
+  - { src: "{{ apache_conf_dir }}/conf.modules.d/00-mpm.conf",       dest: "{{ apache_conf_dir }}/mods-available/mpm.load"       }
+  - { src: "{{ apache_conf_dir }}/conf.modules.d/00-proxy.conf",     dest: "{{ apache_conf_dir }}/mods-available/proxy.load"     }
+  - { src: "{{ apache_conf_dir }}/conf.modules.d/00-ssl.conf",       dest: "{{ apache_conf_dir }}/mods-available/ssl.load"       }
+  - { src: "{{ apache_conf_dir }}/conf.modules.d/00-systemd.conf",   dest: "{{ apache_conf_dir }}/mods-available/systemd.load"   }
+  - { src: "{{ apache_conf_dir }}/conf.modules.d/01-cgi.conf",       dest: "{{ apache_conf_dir }}/mods-available/cgid.load"      }
+  - { src: "{{ apache_conf_dir }}/conf.modules.d/10-mod_dnssd.conf", dest: "{{ apache_conf_dir }}/mods-available/dnssd.load"     }
+
+files_to_remove:
+  - "/etc/httpd/conf/httpd.conf"
+
+files_to_symlink:
+  - { src: "../mods-available/autoindex.conf",  dest: "{{ apache_conf_dir }}/mods-enabled/autoindex.conf",  state: "link"}
+  - { src: "../mods-available/mime_magic.conf", dest: "{{ apache_conf_dir }}/mods-enabled/mime_magic.conf", state: "link"}
+  - { src: "../mods-available/userdir.conf",    dest: "{{ apache_conf_dir }}/mods-enabled/userdir.conf",    state: "link"}
+  - { src: "../mods-available/cgid.load",       dest: "{{ apache_conf_dir }}/mods-enabled/cgid.load",       state: "link"}
+  - { src: "../mods-available/dav.load",        dest: "{{ apache_conf_dir }}/mods-enabled/dav.load",        state: "link"}
+  - { src: "../mods-available/dnssd.conf",      dest: "{{ apache_conf_dir }}/mods-enabled/dnssd.conf",      state: "absent"}
+  - { src: "../mods-available/dnssd.load",      dest: "{{ apache_conf_dir }}/mods-enabled/dnssd.load",      state: "absent"}
+  - { src: "../mods-available/lua.load",        dest: "{{ apache_conf_dir }}/mods-enabled/lua.load",        state: "link"}
+  - { src: "../mods-available/mpm.load",        dest: "{{ apache_conf_dir }}/mods-enabled/mpm.load",        state: "link"}
+  - { src: "../mods-available/proxy.load",      dest: "{{ apache_conf_dir }}/mods-enabled/proxy.load",      state: "link"}
+  - { src: "../mods-available/ssl.load",        dest: "{{ apache_conf_dir }}/mods-enabled/ssl.load",        state: "link"}
+  - { src: "../mods-available/systemd.load",    dest: "{{ apache_conf_dir }}/mods-enabled/systemd.load",    state: "link"}
+  - { src: "../mods-available/ssl.conf",        dest: "{{ apache_conf_dir }}/mods-enabled/ssl.conf",        state: "link"}

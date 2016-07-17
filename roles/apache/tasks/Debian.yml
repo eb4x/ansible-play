@@ -1,8 +1,11 @@
 ---
 
-- name: "apache : enable rewrite module"
-  apache2_module: name=rewrite state=present
+- name: "apache : modules"
+  apache2_module: name={{ mod }} state=present
   become: yes
-- name: "apache : enable ssl module"
-  apache2_module: name=ssl state=present
-  become: yes
+  with_items:
+    - "rewrite"
+    - "ssl"
+  loop_control:
+    loop_var: mod
+

@@ -4,3 +4,7 @@
   service: name={{ apache_service_name }} state=reloaded
   become: yes
 
+- name: service apache restart
+  service: name={{ apache_service_name }} state=restarted
+  become: yes
+
