@@ -1,0 +1,10 @@
+---
+
+- name: symlink into conf-available
+  file: src=/etc/phpmyadmin/apache.conf dest={{ apache_conf_dir }}/conf-available/phpmyadmin.conf state=link
+  become: yes
+
+- name: symlink into conf-enabled
+  file: src=../conf-available/phpmyadmin.conf dest={{ apache_conf_dir }}/conf-enabled/phpmyadmin.conf state=link
+  become: yes
+

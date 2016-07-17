@@ -1,0 +1,11 @@
+---
+
+- include_vars: "{{ ansible_os_family }}.yml"
+
+- name: "install phpmyadmin package"
+  package: name={{ phpmyadmin_package }} state=latest
+  become: yes
+
+- name: "post-task; fix fileplacement and/or symlinks"
+  include: "{{ ansible_os_family }}.yml"
+

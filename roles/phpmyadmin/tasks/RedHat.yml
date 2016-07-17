@@ -1,0 +1,15 @@
+---
+
+- name: stat conf.d/phpMyAdmin.conf
+  stat: path={{ apache_conf_dir }}/conf.d/phpMyAdmin.conf
+  register: file
+
+- name: move conf.d/phpMyAdmin.conf
+  command: mv  {{ apache_conf_dir }}/conf.d/phpMyAdmin.conf {{ apache_conf_dir }}/conf-available/phpmyadmin.conf
+  become: yes
+  when: file.stat.exists == True
+
+- name: symlink conf-enabled/phpmyadin.conf
+  file: src=../conf-available/phpmyadmin.conf dest={{ apache_conf_dir }}/conf-enabled/phpmyadmin.conf state=link
+  become: yes
+
