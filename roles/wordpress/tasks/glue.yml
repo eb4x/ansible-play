@@ -11,19 +11,19 @@
   file: path={{ item }} state=absent
   become: yes
   with_items:
-    - "{{ apache_config_path }}/sites-available/000-default.conf"
-    - "{{ apache_config_path }}/sites-enabled/000-default.conf"
+    - "{{ apache_conf_dir }}/sites-available/000-default.conf"
+    - "{{ apache_conf_dir }}/sites-enabled/000-default.conf"
 
 #
 # Glue.
 #
 
 - name: "wordpress : glue : copy default-ssl.conf to sites-available"
-  template: src="roles/wordpress/templates/apache-default-ssl-{{ ansible_os_family }}.conf.j2" dest="{{ apache_config_path }}/sites-available/default-ssl.conf"
+  template: src="roles/wordpress/templates/apache-default-ssl-{{ ansible_os_family }}.conf.j2" dest="{{ apache_conf_dir }}/sites-available/default-ssl.conf"
   become: yes
 
 - name: "wordpress : glue : create sites-enabled symlink for default-ssl.conf"
-  file: src=../sites-available/default-ssl.conf dest={{ apache_config_path }}/sites-enabled/default-ssl.conf state=link
+  file: src=../sites-available/default-ssl.conf dest={{ apache_conf_dir }}/sites-enabled/default-ssl.conf state=link
   become: yes
 #  notify: service apache reload
 
