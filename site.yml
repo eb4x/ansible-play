@@ -1,13 +1,13 @@
 ---
 
 - name: Wordpressify Linodes
-  hosts: peggy.slipsprogrammor.no
+  hosts: regan.slipsprogrammor.no sofia.slipsprogrammor.no tracy.slipsprogrammor.no
 
-#  vars_prompt:
-#    - name: ssl_certs_password
-#      prompt: "Password for unlocking protected keys"
-#      private: true
-#
+  vars_prompt:
+    - name: ssl_certs_password
+      prompt: "Password for unlocking protected keys"
+      private: true
+
   pre_tasks:
   - name: install EPEL on CentOS 7
     yum: name=epel-release state=latest
@@ -25,21 +25,21 @@
     when: ansible_distribution == 'Fedora'
 
   roles:
-#    - common
     - apache
+    - common
+    - glusterfs
     - mariadb
-#    - ssl-certs
     - php
+    - phpmyadmin
+    - pdnsmanager
+    - powerdns
+    - ssl-certs
     - wordpress
 
   tasks:
-  - name: "apache : enable some much-needed modules"
-    include: "roles/apache/tasks/{{ ansible_os_family }}.yml"
-    when: ansible_os_family == 'Debian'
-
-  - name: "apache : convert httpd to a more debian-esq style"
-    include: "roles/apache/tasks/{{ ansible_os_family }}.yml"
-    when: ansible_os_family == 'RedHat'
-
   - name: "wordpress : glue"
     include: "roles/wordpress/tasks/glue.yml"
+
+#  - name: btrfs subvol
+#    include: btrfs-subvol.yml
+#    include: btrfs-subvol.yml mountpoint=/var/lib/mail
