@@ -48,7 +48,6 @@
   notify: restart fail2ban service
   become: yes
 
-
 - name: start fail2ban service
   service: "name={{ fail2ban_service_name }} state=started enabled=yes"
   become: yes
