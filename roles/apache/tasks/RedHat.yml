@@ -47,19 +47,21 @@
 - name: stat files to move
   stat: path={{ file.src }}
   with_items: "{{ files_to_move }}"
-  register: files
+  register: todo
   loop_control:
     loop_var: file
 
 - name: move files
-  command: "mv {{ file.item.src }} {{ file.item.dest }}"
-  when: file.stat.exists == True
-  with_items: "{{ files.results }}"
+  command: "mv {{ res.file.src }} {{ res.file.dest }}"
+  become: yes
+  when: res.stat.exists == True
+  with_items: "{{ todo.results }}"
   loop_control:
-    loop_var: file
+    loop_var: res
 
 - name: remove files
   file: path={{ file }} state=absent
+  become: yes
   with_items: "{{ files_to_remove }}"
   loop_control:
     loop_var: file
