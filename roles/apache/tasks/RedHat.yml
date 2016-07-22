@@ -47,7 +47,7 @@
 - name: stat files to move
   stat: path={{ file.src }}
   with_items: "{{ files_to_move }}"
-  register: todo
+  register: check
   loop_control:
     loop_var: file
 
@@ -55,7 +55,7 @@
   command: "mv {{ res.file.src }} {{ res.file.dest }}"
   become: yes
   when: res.stat.exists == True
-  with_items: "{{ todo.results }}"
+  with_items: "{{ check.results }}"
   loop_control:
     loop_var: res
 
@@ -96,11 +96,21 @@
 
 # Residual
 
-#- name: remove residual files and symlinks
-#  script: roles/apache/files/residual.py removes=/etc/httpd/conf.d/README
-#  become: yes
+- name: stat dir
+  stat: path={{ dir }}
+  register: check
+  loop_control:
+    loop_var: dir
+  with_items:
+    - "/etc/httpd/conf"
+    - "/etc/httpd/conf.d"
+    - "/etc/httpd/conf.modules.d"
 
-#- name: "remove if empty: /etc/httpd/conf"
-#- name: "remove if empty: /etc/httpd/conf.d"
-#- name: "remove if empty: /etc/httpd/conf.modules.d"
+- name: remove residual files and symlinks
+  script: roles/apache/files/residual.py
+  become: yes
+  when: res.stat.exists == True
+  with_items: "{{ check.results }}"
+  loop_control:
+    loop_var: res
 
