@@ -4,13 +4,14 @@
 
 - name: install apache
   become: yes
-  package: "name={{ apache_package_name }} state=latest"
+  package: "name={{ item }} state=latest"
+  with_items: "{{ apache_packages }}"
 
 - name: "post-tasks; per distro fixes"
   include: "{{ ansible_os_family }}.yml"
 
 - name: service apache start
   become: yes
-  service: "name={{ apache_service_name }} state=started enabled=yes"
+  service: "name={{ apache_service }} state=started enabled=yes"
 
 

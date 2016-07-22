@@ -1,7 +1,7 @@
 ---
 
-apache_package_name: apache2
-apache_service_name: apache2
+apache_packages: apache2
+apache_service: apache2
 
 apache_conf_dir: /etc/apache2
 apache_site_dir: /etc/apache2/sites-available

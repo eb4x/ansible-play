@@ -1,7 +1,7 @@
 ---
 
-apache_package_name: httpd
-apache_service_name: httpd
+apache_packages: [ "httpd", "mod_ssl" ]
+apache_service: httpd
 
 apache_conf_dir: /etc/httpd
 apache_site_dir: /etc/httpd/sites-available
@@ -36,16 +36,18 @@ files_to_remove:
   - "/etc/httpd/conf/httpd.conf"
 
 files_to_symlink:
-  - { src: "../mods-available/autoindex.conf",  dest: "{{ apache_conf_dir }}/mods-enabled/autoindex.conf",  state: "link"}
-  - { src: "../mods-available/mime_magic.conf", dest: "{{ apache_conf_dir }}/mods-enabled/mime_magic.conf", state: "link"}
-  - { src: "../mods-available/userdir.conf",    dest: "{{ apache_conf_dir }}/mods-enabled/userdir.conf",    state: "link"}
-  - { src: "../mods-available/cgid.load",       dest: "{{ apache_conf_dir }}/mods-enabled/cgid.load",       state: "link"}
-  - { src: "../mods-available/dav.load",        dest: "{{ apache_conf_dir }}/mods-enabled/dav.load",        state: "link"}
-  - { src: "../mods-available/dnssd.conf",      dest: "{{ apache_conf_dir }}/mods-enabled/dnssd.conf",      state: "absent"}
-  - { src: "../mods-available/dnssd.load",      dest: "{{ apache_conf_dir }}/mods-enabled/dnssd.load",      state: "absent"}
-  - { src: "../mods-available/lua.load",        dest: "{{ apache_conf_dir }}/mods-enabled/lua.load",        state: "link"}
-  - { src: "../mods-available/mpm.load",        dest: "{{ apache_conf_dir }}/mods-enabled/mpm.load",        state: "link"}
-  - { src: "../mods-available/proxy.load",      dest: "{{ apache_conf_dir }}/mods-enabled/proxy.load",      state: "link"}
-  - { src: "../mods-available/ssl.load",        dest: "{{ apache_conf_dir }}/mods-enabled/ssl.load",        state: "link"}
-  - { src: "../mods-available/systemd.load",    dest: "{{ apache_conf_dir }}/mods-enabled/systemd.load",    state: "link"}
-  - { src: "../mods-available/ssl.conf",        dest: "{{ apache_conf_dir }}/mods-enabled/ssl.conf",        state: "link"}
+  - { src: "../mods-available/autoindex.conf",  dest: "{{ apache_conf_dir }}/mods-enabled/autoindex.conf",  state: "link"   }
+  - { src: "../mods-available/mime.conf",       dest: "{{ apache_conf_dir }}/mods-enabled/mime.conf",       state: "link"   }
+  - { src: "../mods-available/mime_magic.conf", dest: "{{ apache_conf_dir }}/mods-enabled/mime_magic.conf", state: "link"   }
+  - { src: "../mods-available/ssl.conf",        dest: "{{ apache_conf_dir }}/mods-enabled/ssl.conf",        state: "link"   }
+  - { src: "../mods-available/userdir.conf",    dest: "{{ apache_conf_dir }}/mods-enabled/userdir.conf",    state: "link"   }
+  - { src: "../mods-available/cgid.load",       dest: "{{ apache_conf_dir }}/mods-enabled/cgid.load",       state: "link"   }
+  - { src: "../mods-available/dav.load",        dest: "{{ apache_conf_dir }}/mods-enabled/dav.load",        state: "link"   }
+  - { src: "../mods-available/dnssd.conf",      dest: "{{ apache_conf_dir }}/mods-enabled/dnssd.conf",      state: "absent" }
+  - { src: "../mods-available/dnssd.load",      dest: "{{ apache_conf_dir }}/mods-enabled/dnssd.load",      state: "absent" }
+  - { src: "../mods-available/lua.load",        dest: "{{ apache_conf_dir }}/mods-enabled/lua.load",        state: "link"   }
+  - { src: "../mods-available/mpm.load",        dest: "{{ apache_conf_dir }}/mods-enabled/mpm.load",        state: "link"   }
+  - { src: "../mods-available/proxy.load",      dest: "{{ apache_conf_dir }}/mods-enabled/proxy.load",      state: "link"   }
+  - { src: "../mods-available/ssl.load",        dest: "{{ apache_conf_dir }}/mods-enabled/ssl.load",        state: "link"   }
+  - { src: "../mods-available/systemd.load",    dest: "{{ apache_conf_dir }}/mods-enabled/systemd.load",    state: "link"   }
+
