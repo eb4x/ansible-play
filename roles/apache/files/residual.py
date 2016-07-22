@@ -24,18 +24,21 @@ for mod in mods:
 		conf.close()
 		break
 
-os.remove("conf.d/README")
+try:
+	if os.listdir("conf") == []:
+		os.rmdir("conf")
+except OSError:
+	pass
 
-if os.listdir("conf") == []:
-	os.rmdir("conf")
+try:
+	if os.listdir("conf.d") == []:
+		os.rmdir("conf.d")
+except OSError:
+	pass
 
-if os.listdir("conf.d") == []:
-	os.rmdir("conf.d")
-
-if os.listdir("conf.modules.d") == []:
-	os.rmdir("conf.modules.d")
-
-os.remove("logs")
-os.remove("modules")
-os.remove("run")
+try:
+	if os.listdir("conf.modules.d") == []:
+		os.rmdir("conf.modules.d")
+except OSError:
+	pass
 
