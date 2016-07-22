@@ -9,6 +9,10 @@
   package: name={{ httplib2_package_name }} state=latest
   become: yes
 
+- name: install vim
+  package: name=vim state=latest
+  become: yes
+
 - name: install fail2ban
   package: name={{ fail2ban_package_name }} state=latest
   become: yes
