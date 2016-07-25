@@ -42,3 +42,8 @@ try:
 except OSError:
 	pass
 
+# Python 3.4
+#with ignored(OSError):
+#	if os.listdir("conf.modules.d") == []:
+#		os.rmdir("conf.modules.d")
+
