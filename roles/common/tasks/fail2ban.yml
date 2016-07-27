@@ -1,0 +1,46 @@
+---
+
+- name: tweak fail2ban recidive enabled
+  ini_file: dest=/etc/fail2ban/jail.d/local.conf section=recidive option=enabled value=true
+  notify: service fail2ban restart
+  become: yes
+
+- name: tweak fail2ban recidive bantime
+  ini_file: dest=/etc/fail2ban/jail.d/local.conf section=recidive option=bantime value=-1
+  notify: service fail2ban restart
+  become: yes
+
+- name: tweak fail2ban recidive findtime
+  ini_file: dest=/etc/fail2ban/jail.d/local.conf section=recidive option=findtime value=86400
+  notify: service fail2ban restart
+  become: yes
+
+- name: tweak fail2ban recidive maxretry
+  ini_file: dest=/etc/fail2ban/jail.d/local.conf section=recidive option=maxretry value=3
+  notify: service fail2ban restart
+  become: yes
+
+- name: tweak fail2ban sshd enabled
+  ini_file: dest=/etc/fail2ban/jail.d/local.conf section=sshd option=enabled value=true
+  notify: service fail2ban restart
+  become: yes
+
+- name: tweak fail2ban sshd findtime
+  ini_file: dest=/etc/fail2ban/jail.d/local.conf section=sshd option=findtime value=3600
+  notify: service fail2ban restart
+  become: yes
+
+- name: tweak fail2ban sshd maxretry
+  ini_file: dest=/etc/fail2ban/jail.d/local.conf section=sshd option=maxretry value=3
+  notify: service fail2ban restart
+  become: yes
+
+- name: stat fail2ban.log
+  stat: path=/var/log/fail2ban.log
+  register: res
+
+- name: fix fail2ban log w/permissions
+  file: path=/var/log/fail2ban.log state=touch
+  become: yes
+  when: res.stat.exists == False
+
