@@ -6,18 +6,21 @@
     - "secrets.yml"
     - "version.yml"
 
-- name: check for pdnsmanager-{{ pdnsmanager_version }} installation
+- name: fix permissions on pdnsmanager-{{ pdnsmanager_version }} installation
   file: path=/usr/local/share/pdnsmanager/{{ pdnsmanager_version }} state=directory owner=root group=root mode=0755 setype=httpd_sys_content_t
   become: yes
-  register: res
+
+- name: check if pdnsmanager-{{ pdnsmanager_version }} is installed/configured
+  stat: path=/usr/local/share/pdnsmanager/{{ pdnsmanager_version }}/config/config-user.php
+  register: check
 
 - name: download and install pdnsmanager-{{ pdnsmanager_version }}
   unarchive: src=https://pdnsmanager.lmitsystems.de/files/pdns-manager-{{ pdnsmanager_version }}.tar.gz dest=/usr/local/share/pdnsmanager/{{ pdnsmanager_version }} copy=no
   become: yes
-  when: res.changed == true
+  when: check.stat.exists == False
 
 - name: configure pdnsmanager-{{ pdnsmanager_version }} installation
-  template: src=config-user.php.j2 dest=/usr/local/share/pdnsmanager/{{ pdnsmanager_version }}/config/config-user.php
+  template: src=config-user.php.j2 dest=/usr/local/share/pdnsmanager/{{ pdnsmanager_version }}/config/config-user.php setype=httpd_sys_content_t
   become: yes
 
 - name: copy apache.conf to conf-available/pdnsmanager.conf
@@ -42,4 +45,8 @@
   mysql_db: login_user=root name=powerdns state=import target=/tmp/pdnsmanager.sql
   become: yes
   when: db.changed == true
+
+- name: neutralize permissions
+  file: path=/usr/local/share/pdnsmanager recurse=yes owner=root group=root setype=httpd_sys_content_t
+  become: yes
 
