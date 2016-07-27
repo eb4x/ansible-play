@@ -19,7 +19,6 @@ files_to_copy:
 files_to_move:
   - { src: "{{ apache_conf_dir }}/conf/magic",                       dest: "{{ apache_conf_dir }}/magic"                         }
   - { src: "{{ apache_conf_dir }}/conf.d/autoindex.conf",            dest: "{{ apache_conf_dir }}/mods-available/autoindex.conf" }
-  - { src: "{{ apache_conf_dir }}/conf.d/mod_dnssd.conf",            dest: "{{ apache_conf_dir }}/mods-available/dnssd.conf"     }
   - { src: "{{ apache_conf_dir }}/conf.d/ssl.conf",                  dest: "{{ apache_conf_dir }}/mods-available/ssl.conf"       }
   - { src: "{{ apache_conf_dir }}/conf.d/userdir.conf",              dest: "{{ apache_conf_dir }}/mods-available/userdir.conf"   }
   - { src: "{{ apache_conf_dir }}/conf.d/welcome.conf",              dest: "{{ apache_conf_dir }}/conf-available/welcome.conf"   }
@@ -30,10 +29,13 @@ files_to_move:
   - { src: "{{ apache_conf_dir }}/conf.modules.d/00-ssl.conf",       dest: "{{ apache_conf_dir }}/mods-available/ssl.load"       }
   - { src: "{{ apache_conf_dir }}/conf.modules.d/00-systemd.conf",   dest: "{{ apache_conf_dir }}/mods-available/systemd.load"   }
   - { src: "{{ apache_conf_dir }}/conf.modules.d/01-cgi.conf",       dest: "{{ apache_conf_dir }}/mods-available/cgid.load"      }
-  - { src: "{{ apache_conf_dir }}/conf.modules.d/10-mod_dnssd.conf", dest: "{{ apache_conf_dir }}/mods-available/dnssd.load"     }
 
 files_to_remove:
+  - "/etc/httpd/logs"
+  - "/etc/httpd/modules"
+  - "/etc/httpd/run"
   - "/etc/httpd/conf/httpd.conf"
+  - "/etc/httpd/conf.d/README"
 
 files_to_symlink:
   - { src: "../mods-available/autoindex.conf",  dest: "{{ apache_conf_dir }}/mods-enabled/autoindex.conf",  state: "link"   }

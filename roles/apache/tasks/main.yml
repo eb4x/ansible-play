@@ -13,7 +13,7 @@
 - name: copy apache2.conf template
   template: src=apache2.conf.{{ ansible_os_family }}.j2 dest={{ apache_conf_dir }}/{{ apache_conf_file }}
   become: yes
-  
+
 - name: service apache start
   become: yes
   service: "name={{ apache_service }} state=started enabled=yes"
@@ -27,4 +27,11 @@
     - https
   when: ansible_os_family == 'RedHat'
 
+- name: "selinux: allow network and database"
+  seboolean: name={{ item }} state=yes persistent=yes
+  become: yes
+  with_items:
+    - "httpd_can_network_connect"
+    - "httpd_can_network_connect_db"
+  when: ansible_os_family == 'RedHat'
 
