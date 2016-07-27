@@ -1,0 +1,8 @@
+---
+
+dependencies:
+  - { role: apache }
+  - { role: mariadb }
+  - { role: ssl-certs }
+  - { role: php }
+
