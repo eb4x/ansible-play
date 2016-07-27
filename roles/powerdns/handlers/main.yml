@@ -1,0 +1,6 @@
+---
+
+- name: service powerdns restart
+  service: name={{ powerdns_service }} state=restarted
+  become: yes
+

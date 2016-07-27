@@ -28,6 +28,7 @@
   with_items:
     - { src: "pdns.conf.j2",       dest: "pdns.conf"              }
     - { src: "pdns.mysql.conf.j2", dest: "pdns.d/pdns.mysql.conf" }
+  notify: service powerdns restart
 
 - name: remove crud
   file: path={{ item }} state=absent
