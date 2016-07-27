@@ -38,3 +38,6 @@
   notify: service apache reload
   when: not wp_configured.stat.exists
 
+- name: neutralize permissions
+  file: path=/usr/local/share/wordpress recurse=yes owner=root group=root setype=httpd_sys_content_t
+  become: yes
