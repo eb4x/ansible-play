@@ -23,6 +23,6 @@
   become: yes
 
 - name: update firewall
-  firewalld: service=glusterfs state=enabled permanent=yes immediate=yes
+  firewalld: service=glusterfs state=enabled immediate=yes permanent=yes
   become: yes
   when: ansible_os_family == 'RedHat'
