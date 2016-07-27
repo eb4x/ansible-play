@@ -2,7 +2,20 @@
 
 # BUG: a2enmod php7.0 gives a warning,
 # and ansible treats it as an error.
+- name: stat mods-enabled/php7
+  stat: "path={{ apache_conf_dir }}/mods-enabled/{{ file }}"
+  register: check
+  with_items:
+    - "php7.0.conf"
+    - "php7.0.load"
+  loop_control:
+    loop_var: file
+
 - name: "apache : enable php module"
   command: "a2enmod {{ php_apache_mod }}"
   become: yes
+  when: res.stat.exists == False
+  with_items: "{{ check.results }}"
+  loop_control:
+    loop_var: res
 

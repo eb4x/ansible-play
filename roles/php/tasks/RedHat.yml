@@ -2,18 +2,18 @@
 
 - name: stat files to move
   stat: "path={{ file.src }}"
-  register: files
+  register: check
   with_items: "{{ files_to_move }}"
   loop_control:
     loop_var: file
 
 - name: move files
-  command: "mv {{ file.item.src }} {{ file.item.dest }}"
+  command: "mv {{ res.file.src }} {{ res.file.dest }}"
   become: yes
-  when: file.stat.exists == True
-  with_items: "{{ files.results }}"
+  when: res.stat.exists == True
+  with_items: "{{ check.results }}"
   loop_control:
-    loop_var: file
+    loop_var: res
 
 - name: files to symlink
   file: src=../mods-available/{{ file }} dest={{ apache_conf_dir }}/mods-enabled/{{ file }} state=link
@@ -24,3 +24,22 @@
   loop_control:
     loop_var: file
 
+# Residual
+
+- name: stat dir
+  stat: path={{ dir }}
+  register: check
+  loop_control:
+    loop_var: dir
+  with_items:
+    - "/etc/httpd/conf"
+    - "/etc/httpd/conf.d"
+    - "/etc/httpd/conf.modules.d"
+
+- name: remove residual files and symlinks
+  script: roles/apache/files/residual.py
+  become: yes
+  when: res.stat.exists == True
+  with_items: "{{ check.results }}"
+  loop_control:
+    loop_var: res

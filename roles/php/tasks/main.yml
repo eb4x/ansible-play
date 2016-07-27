@@ -14,7 +14,7 @@
   when: ansible_distribution == 'Debian'
 - include_vars: "Ubuntu-16.yml"
   when: ansible_distribution == 'Ubuntu'
-- include_vars: "RedHat.yml"
+- include_vars: "RedHat-56.yml"
   when: ansible_os_family == 'RedHat'
 
 - name: install php packages
