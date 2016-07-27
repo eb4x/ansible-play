@@ -1,16 +1,21 @@
 ---
 
 - name: Wordpressify Linodes
-  hosts: regan.slipsprogrammor.no sofia.slipsprogrammor.no tracy.slipsprogrammor.no
+  hosts: linodes
 
-  vars_prompt:
-    - name: ssl_certs_password
-      prompt: "Password for unlocking protected keys"
-      private: true
+#  vars_prompt:
+#    - name: ssl_certs_password
+#      prompt: "Password for unlocking protected keys"
+#      private: true
 
   pre_tasks:
   - name: install EPEL on CentOS 7
     yum: name=epel-release state=latest
+    become: yes
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version|int == 7
+
+  - name: install IUS on CentOS 7
+    yum: name=https://centos7.iuscommunity.org/ius-release.rpm state=present
     become: yes
     when: ansible_distribution == 'CentOS' and ansible_distribution_major_version|int == 7
 
@@ -19,15 +24,22 @@
     become: yes
     when: ansible_distribution == 'Fedora' and ansible_distribution_major_version|int >= 22
 
-  - name: install libselinux-python on Fedora
-    package: name=libselinux-python state=latest
+  - name: install python-httplib2 for ansible uri functions
+    package: name=python-httplib2 state=latest
     become: yes
-    when: ansible_distribution == 'Fedora'
+
+  - name: install python selinux packages
+    package: name={{ item }} state=latest
+    become: yes
+    with_items:
+      - "libselinux-python"
+      - "libsemanage-python"
+    when: ansible_os_family == 'RedHat'
 
   roles:
     - apache
     - common
-    - glusterfs
+#    - glusterfs
     - mariadb
     - php
     - phpmyadmin
