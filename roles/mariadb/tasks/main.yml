@@ -11,12 +11,12 @@
 
 - name: "check if my.cnf is a symlink"
   stat: path={{ mariadb_cnf }}
-  register: res
+  register: check
 
 - name: "remove said my.cnf symlink"
   file: path={{ mariadb_cnf }} state=absent
   become: yes
-  when: res.stat.islnk == true
+  when: check.stat.islnk == true
 
 - name: remove crud
   file: path={{ item }} state=absent
@@ -30,12 +30,18 @@
 - name: "copy sane my.cnf"
   template: "src=my.cnf.j2 dest={{ mariadb_cnf }}"
   become: yes
-  register: res
+  register: config
+
+# because CentOS has unix_socket under /var/run/mariadb/mysql.sock
+- name: copy /root/.my.cnf
+  template: src=root.my.cnf.j2 dest=/root/.my.cnf
+  become: yes
+  when: ansible_os_family == 'RedHat'
 
 - name: "service mariadb-server restart"
   service: "name={{ mariadb_service }} state=restarted"
   become: yes
-  when: res.changed == true
+  when: config.changed == true
 
 - name: "service mariadb-server start"
   service: "name={{ mariadb_service }} state=started enabled=yes"
