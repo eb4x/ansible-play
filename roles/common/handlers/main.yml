@@ -1,0 +1,5 @@
+---
+
+- name: service fail2ban restart
+  service: name=fail2ban state=restarted
+  become: yes
