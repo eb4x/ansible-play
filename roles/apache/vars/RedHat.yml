@@ -4,10 +4,10 @@ apache_packages: [ "httpd", "mod_ssl" ]
 apache_service: httpd
 
 apache_conf_dir: /etc/httpd
+apache_conf_file: httpd.conf
 apache_site_dir: /etc/httpd/sites-available
 
 files_to_copy:
-  - { src: "httpd.conf",                                dest: "{{ apache_conf_dir }}/httpd.conf"                                }
   - { src: "ports.conf",                                dest: "{{ apache_conf_dir }}/ports.conf"                                }
   - { src: "conf-available/charset.conf",               dest: "{{ apache_conf_dir }}/conf-available/charset.conf"               }
   - { src: "conf-available/localized-error-pages.conf", dest: "{{ apache_conf_dir }}/conf-available/localized-error-pages.conf" }

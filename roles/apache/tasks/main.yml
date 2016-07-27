@@ -10,8 +10,21 @@
 - name: "post-tasks; per distro fixes"
   include: "{{ ansible_os_family }}.yml"
 
+- name: copy apache2.conf template
+  template: src=apache2.conf.{{ ansible_os_family }}.j2 dest={{ apache_conf_dir }}/{{ apache_conf_file }}
+  become: yes
+  
 - name: service apache start
   become: yes
   service: "name={{ apache_service }} state=started enabled=yes"
+  ignore_errors: yes
+
+- name: "firewall: open for business"
+  firewalld: service={{ item }} state=enabled immediate=yes permanent=yes
+  become: yes
+  with_items:
+    - http
+    - https
+  when: ansible_os_family == 'RedHat'
 
 

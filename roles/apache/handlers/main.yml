@@ -1,10 +1,10 @@
 ---
 
 - name: service apache reload
-  service: name={{ apache_service_name }} state=reloaded
+  service: name={{ apache_service }} state=reloaded
   become: yes
 
 - name: service apache restart
-  service: name={{ apache_service_name }} state=restarted
+  service: name={{ apache_service }} state=restarted
   become: yes
 

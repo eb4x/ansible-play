@@ -4,5 +4,6 @@ apache_packages: apache2
 apache_service: apache2
 
 apache_conf_dir: /etc/apache2
+apache_conf_file: apache2.conf
 apache_site_dir: /etc/apache2/sites-available
 
