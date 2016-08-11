@@ -4,6 +4,14 @@
 # {flaming turd|steaming pile of shit} This is an attempt to clean it up
 # in a somewhat debian-esque manner, and make it less sucky.
 
+- name: create www-data gid
+  group: gid=33 name=www-data system=yes
+  become: yes
+
+- name: create www-data uid
+  user: uid=33 name=www-data group=www-data home=/var/www groups=ssl-cert system=yes createhome=no
+  become: yes
+
 - name: check {{ apache_conf_dir }} directories
   file: path={{ dir }} state=directory owner=root group=root
   become: yes
