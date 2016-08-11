@@ -3,11 +3,6 @@
 - name: Wordpressify Linodes
   hosts: linodes
 
-#  vars_prompt:
-#    - name: ssl_certs_password
-#      prompt: "Password for unlocking protected keys"
-#      private: true
-
   pre_tasks:
   - name: install EPEL on CentOS 7
     yum: name=epel-release state=latest
@@ -36,6 +31,16 @@
       - "libsemanage-python"
     when: ansible_os_family == 'RedHat'
 
+  - name: fix sudoers
+    replace: dest=/etc/sudoers regexp={{ sudoers.regexp }} replace={{ sudoers.line }}
+    become: yes
+    when: ansible_os_family == sudoers.os
+    with_items:
+      - { os: "Debian", regexp: '^%sudo\s+((?!NOPASSWD).)*$',  line: "%sudo ALL=(ALL:ALL) NOPASSWD: ALL" }
+      - { os: "RedHat", regexp: '^%wheel\s+((?!NOPASSWD).)*$', line: "%wheel ALL=(ALL) NOPASSWD: ALL"    }
+    loop_control:
+      loop_var: sudoers
+
   roles:
     - apache
     - common
@@ -51,6 +56,9 @@
   tasks:
   - name: "wordpress : glue"
     include: "roles/wordpress/tasks/glue.yml"
+
+  - name: "wordpress : gluster"
+    include: "roles/wordpress/tasks/gluster.yml"
 
 #  - name: btrfs subvol
 #    include: btrfs-subvol.yml
