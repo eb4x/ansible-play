@@ -1,0 +1,38 @@
+---
+
+- name: "create directories"
+  file: path={{ item }} state=directory owner=www-data group=www-data mode="2775"
+  become: yes
+  with_items:
+    - "/srv/glusterfs/wordpress"
+    - "/var/www/wordpress"
+
+#- name: create wordpress subvolume
+#  btrfs:
+#  become: yes
+
+- name: "mount wordpress subvolume"
+  mount: src="UUID={{ ansible_devices['sda'].partitions['sda3'].uuid }}" name=/srv/glusterfs/wordpress fstype=btrfs opts=noatime,nodiratime,subvol=wordpress dump=0 passno=2 state=mounted
+  become: yes
+
+- name: "build glusterfs-wordpress volume"
+  gluster_volume: state=present name=wordpress cluster={{ groups.linodes | join(',') }} bricks=/srv/glusterfs/wordpress replicas={{ groups.linodes | count }} force=yes
+  become: yes
+  run_once: true
+
+- name: "start glusterfs-wordpress volume"
+  gluster_volume: state=started name=wordpress
+  become: yes
+  run_once: true
+
+- name: "fix permission on directories after mount"
+  file: path={{ item }} state=directory owner=www-data group=www-data mode="2775"
+  become: yes
+  with_items:
+    - "/srv/glusterfs/wordpress"
+    - "/var/www/wordpress"
+
+- name: "mount wordpress gluster volume"
+  mount: src="localhost:/wordpress" name=/var/www/wordpress fstype=glusterfs opts=defaults dump=0 passno=0 state=mounted
+  become: yes
+
