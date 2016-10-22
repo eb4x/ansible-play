@@ -7,3 +7,6 @@ apache_conf_dir: /etc/apache2
 apache_conf_file: apache2.conf
 apache_site_dir: /etc/apache2/sites-available
 
+apache_user: www-data
+apache_group: www-data
+

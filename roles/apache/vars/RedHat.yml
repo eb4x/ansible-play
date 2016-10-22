@@ -7,6 +7,9 @@ apache_conf_dir: /etc/httpd
 apache_conf_file: httpd.conf
 apache_site_dir: /etc/httpd/sites-available
 
+apache_user: www-data
+apache_group: www-data
+
 files_to_copy:
   - { src: "ports.conf",                                dest: "{{ apache_conf_dir }}/ports.conf"                                }
   - { src: "conf-available/charset.conf",               dest: "{{ apache_conf_dir }}/conf-available/charset.conf"               }

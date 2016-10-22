@@ -9,7 +9,7 @@
   become: yes
 
 - name: create www-data uid
-  user: uid=33 name=www-data group=www-data home=/var/www groups=ssl-cert system=yes createhome=no
+  user: uid=33 name=www-data group=www-data comment=www-data home=/var/www createhome=no shell=/usr/sbin/nologin groups=ssl-cert system=yes
   become: yes
 
 - name: check {{ apache_conf_dir }} directories
@@ -26,11 +26,11 @@
     loop_var: dir
 
 - name: check /var/lock/httpd directory
-  file: path=/var/lock/httpd state=directory owner=apache group=apache
+  file: path=/var/lock/httpd state=directory owner={{ apache_user }} group={{ apache_group }}
   become: yes
 
 - name: check /var/www directory
-  file: path=/var/www state=directory owner=apache group=apache mode=2775
+  file: path=/var/www state=directory owner={{ apache_user }} group={{ apache_group }} mode=2775
   become: yes
 
 #
