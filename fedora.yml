@@ -1,0 +1,111 @@
+---
+
+- name: tune Fedora system
+  gather_facts: true
+  hosts: localhost
+
+  vars:
+    monitor_programs:
+    - htop
+    - iftop
+    - iotop
+    - sysstat
+    disk_utils:
+    - exfat-utils
+    - fuse-exfat
+    - fuse-sshfs
+    devel_utils:
+    - automake
+    - autoconf
+    - gcc
+    - gcc-c++
+    - git
+    - jq
+    - libtool
+    - redhat-rpm-config
+    bcachefs:
+    - userspace-rcu-devel
+    - libuuid-devel
+    - libattr-devel
+    - keyutils-libs-devel
+    - libscrypt-devel
+    - libblkid-devel
+    - libsodium-devel
+    - zlib-devel
+    media:
+    - ffmpeg
+    - gstreamer1-libav
+    - gstreamer1-plugins-good
+    - gstreamer1-plugins-bad-free
+    - gstreamer1-plugins-bad-freeworld
+    - gstreamer1-plugins-bad-nonfree
+    - gstreamer1-plugins-ugly
+    - mplayer
+    - xine-lib-extras-freeworld
+    - youtube-dl
+
+  pre_tasks:
+
+  - name: fix sudoers
+    replace:
+      dest: /etc/sudoers
+      regexp: '^%wheel\s+((?!NOPASSWD).)*$'
+      replace: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    become: true
+
+  - name: install rpmfusion repo
+    dnf:
+      name: "{{ item }}"
+      state: present
+    with_items:
+    - https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_distribution_major_version }}.noarch.rpm
+    - https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_distribution_major_version }}.noarch.rpm
+    become: true
+
+  - name: install packages I want
+    dnf:
+      name: "{{ item }}"
+      state: latest
+    with_items:
+    - ansible-python3
+    - chromium
+    - deluge-gtk
+    - gnome-tweak-tool
+    - openssh-server
+    - NetworkManager-strongswan-gnome
+    - strongswan-charon-nm
+    - nmap
+    - renameutils
+    - steam
+    - thunderbird
+    - unrar
+    - vim-enhanced
+    - "{{ monitor_programs }}"
+    - "{{ disk_utils }}"
+    - "{{ devel_utils }}"
+    - "{{ bcachefs }}"
+    - "{{ media }}"
+    become: true
+
+  - name: remove packages I don't want
+    dnf:
+      name: "{{ item }}"
+      state: absent
+    with_items:
+    - evolution
+    - libreoffice-calc
+    - libreoffice-draw
+    - libreoffice-impress
+    - net-tools
+    - shotwell
+    - rhythmbox
+    become: true
+
+  tasks:
+
+  - name: setup ssh
+    systemd:
+      name: sshd
+      enabled: true
+      state: started
+    become: true
