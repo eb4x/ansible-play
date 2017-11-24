@@ -1,7 +1,6 @@
 ---
 
-- name: tune Fedora system
-  gather_facts: true
+- name: Tune Fedora workstation
   hosts: localhost
 
   vars:
@@ -45,7 +44,6 @@
     - youtube-dl
 
   pre_tasks:
-
   - name: fix sudoers
     replace:
       dest: /etc/sudoers
@@ -71,12 +69,14 @@
     - chromium
     - deluge-gtk
     - gnome-tweak-tool
+    - google-chrome
     - openssh-server
     - NetworkManager-strongswan-gnome
     - strongswan-charon-nm
     - nmap
     - renameutils
     - steam
+    - sudo
     - thunderbird
     - unrar
     - vim-enhanced
@@ -97,8 +97,8 @@
     - libreoffice-draw
     - libreoffice-impress
     - net-tools
-    - shotwell
     - rhythmbox
+    - shotwell
     become: true
 
   tasks:
