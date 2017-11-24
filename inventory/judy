@@ -1,0 +1,2 @@
+[judy]
+judy.slipsprogrammor.no ansible_user=root ansible_host=192.168.38.111

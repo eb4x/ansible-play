@@ -1,0 +1,26 @@
+---
+
+- name: install cobbler dependencies
+  package:
+    name: "{{ item }}"
+  with_items:
+  - make
+  - apache2
+  - apache2-bin
+  - libapache2-mod-wsgi
+  become: true
+
+- name: enable apache modules
+  apache2_module:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - wsgi
+  - proxy
+
+#- name: get source
+#  unarchive:
+#    src: https://github.com/cobbler/cobbler/archive/v2.8.2.tar.gz
+#    dest: /usr/local/src
+#    remote_src: true
+#  become: true
