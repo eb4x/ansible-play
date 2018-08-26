@@ -1,0 +1,40 @@
+---
+
+- name: Setup
+  hosts: peggy
+
+  vars:
+    wp_sites:
+      - domain: www.klitor.is
+        aliases:
+          - klitor.is
+        short_hand: klitor_is
+        password: REPLACEME
+      - domain: www.nassty.com
+        aliases:
+          - nassty.com
+        short_hand: nassty_com
+        password: REPLACEME
+      - domain: www.xn--slipsprogrammr-2qb.no
+        aliases:
+          - xn--slipsprogrammr-2qb.no
+          - www.slipsprogrammoer.no
+          - slipsprogrammoer.no
+          - www.slipsprogrammor.no
+          - slipsprogrammor.no
+        short_hand: slips_no
+        password: REPLACEME
+
+  pre_tasks:
+   #- import_playbooks: sudoers.yml
+
+  roles:
+    #- postfix
+    - wordpress
+
+  tasks:
+    - include_tasks: roles/wordpress/tasks/create_site.yml
+      with_items:
+        - "{{ wp_sites }}"
+      loop_control:
+        loop_var: site
