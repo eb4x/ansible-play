@@ -1,0 +1,21 @@
+---
+
+- name: install ssl-cert
+  package:
+    name: ssl-cert
+  when:
+    - ansible_os_family == 'Debian'
+
+- name: check/create ssl-cert group
+  group:
+    name: ssl-cert
+    system: yes
+    state: present
+
+- name: check/create /etc/ssl/private
+  file:
+    path: /etc/ssl/private
+    state: directory
+    mode: '2750'
+    owner: root
+    group: ssl-cert
