@@ -1,9 +1,9 @@
 ---
 
 mariadb_server:
-  - "mariadb-server"
   - "mariadb-common"
-mysql_python: "python-mysqldb"
+  - "mariadb-server"
+mysql_python: "python3-mysqldb"
 
 mariadb_service: "mysql"
 

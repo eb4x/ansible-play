@@ -1,0 +1,6 @@
+---
+
+mariadb_server:
+  - "mariadb-common"
+  - "mariadb-server"
+mysql_python: "python3-mysqldb"
