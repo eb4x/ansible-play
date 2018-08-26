@@ -1,0 +1,4 @@
+---
+
+php_fpm: php7.2-fpm
+php_mysql: php7.2-mysql
