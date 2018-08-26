@@ -2,14 +2,14 @@
 
 $client_path = null;
 
-# If access on default-ssl.conf
+# If access on shared.conf
 if ( $_SERVER['HTTP_HOST'] === '{{ ansible_fqdn }}' ) {
   preg_match('/^\/wordpress\/(.+?)\//', $_SERVER['REQUEST_URI'], $client_path);
   $client_path = $client_path[1];
 
   define('WP_CONTENT_URL', 'https://{{ ansible_fqdn }}/wordpress/'. $client_path .'/wp-content');
 
-# if access on clientdomain.conf
+# if access on client.conf
 } else {
   $client_path = preg_replace('/\/var\/www\/wordpress\//', "", $_SERVER['DOCUMENT_ROOT']);
 

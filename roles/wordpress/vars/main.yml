@@ -1,7 +1,2 @@
 ---
-
-# Doesn't quite work from here.
-#action: "uri url=https://api.wordpress.org/core/version-check/1.7/ return_content=yes"
-#register: wp_response
-
 wp_version: "{{ wp_response.json.offers[0].current }}"

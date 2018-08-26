@@ -1,43 +1,77 @@
 ---
 
 - name: json wordpress version check
-  action: "uri url=https://api.wordpress.org/core/version-check/1.7/ return_content=yes"
+  uri:
+    url: https://api.wordpress.org/core/version-check/1.7/
+    return_content: true
   register: wp_response
+
+#- debug:
+#    var: wp_response
 
 - name: check that wp_version is defined
   assert: { that: wp_version is defined }
 
 - name: "check /etc/wordpress"
-  file: path=/etc/wordpress state=directory owner=root group=root mode=0755
-  become: yes
+  file:
+    state: directory
+    path: /etc/wordpress
+    owner: root
+    group: root
+    mode: "0755"
 
 - name: "copy /etc/wordpress config"
-  template: src={{ item.src }} dest=/etc/wordpress/{{ item.dest }}
-  become: yes
+  template:
+    src: "{{ item.src }}"
+    dest: "/etc/wordpress/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
   with_items:
-    - { src: "apache-wp-client.conf.j2", dest: "apache-wp-client.conf" }
-    - { src: "apache-wp-shared.conf.j2", dest: "apache-wp-shared.conf" }
-    - { src: "wp-config.php.j2",         dest: "wp-config.php"         }
+    - { src: "wp-config-shared.php.j2",         dest: "wp-config.php"         }
+#    - { src: "apache-wp-shared.conf.j2", dest: "apache-wp-shared.conf" }
+#    - { src: "apache-wp-client.conf.j2", dest: "apache-wp-client.conf" }
 
 - name: "check /usr/local/share/wordpress/{{ wp_version }}"
-  file: path=/usr/local/share/wordpress/{{ wp_version }} state=directory owner=root group=root mode=0755 setype=httpd_sys_content_t
-  become: yes
+  file:
+    state: directory
+    path: "/usr/local/share/wordpress/{{ wp_version }}"
+    owner: root
+    group: root
+    mode: "0755"
+    setype: httpd_sys_content_t
 
-- name: "check /usr/local/share/wordpress/{{ wp_version }}/wp-config.php is symlinked"
-  stat: path=/usr/local/share/wordpress/{{ wp_version }}/wp-config.php
-  register: wp_configured
-
-- name: download and extract wordpress
-  shell: wget https://downloads.wordpress.org/release/wordpress-{{ wp_version }}.tar.gz -O - | tar -C /usr/local/share/wordpress/{{ wp_version }} --strip=1 -xzf - warn=false
-  become: yes
-  when: not wp_configured.stat.exists
+- name: "get wordpress {{ wp_version }}"
+  unarchive:
+    remote_src: true
+    src: "https://downloads.wordpress.org/release/wordpress-{{ wp_version }}.tar.gz"
+    dest: "/usr/local/share/wordpress/{{ wp_version }}"
+    owner: root
+    group: root
+    extra_opts:
+      - "--strip=1"
+    exclude:
+      - "wp-content"
 
 - name: configure/symlink wp-config.php
-  file: src=/etc/wordpress/wp-config.php dest=/usr/local/share/wordpress/{{ wp_version }}/wp-config.php state=link
-  become: yes
-  notify: service apache reload
-  when: not wp_configured.stat.exists
+  file:
+    state: link
+    src: /etc/wordpress/wp-config.php
+    dest: "/usr/local/share/wordpress/{{ wp_version }}/wp-config.php"
+#  notify: service apache reload
 
 - name: neutralize permissions
-  file: path=/usr/local/share/wordpress recurse=yes owner=root group=root setype=httpd_sys_content_t
-  become: yes
+  file:
+    path: /usr/local/share/wordpress
+    recurse: yes
+    owner: root
+    group: root
+    setype: httpd_sys_content_t
+
+- name: "create central storage"
+  file:
+    state: directory
+    path: /var/www/wordpress
+    owner: www-data
+    group: www-data
+    mode: "2755"

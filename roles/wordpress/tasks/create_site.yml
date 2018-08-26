@@ -1,0 +1,51 @@
+---
+
+- name: "create system user: {{ site.short_hand }}"
+  user:
+    name: "{{ site.short_hand }}"
+    #group: "{{ site.short_hand }}"
+    home: "/var/www/wordpress/wp_{{ site.short_hand }}"
+    shell: /usr/sbin/nologin
+
+- name: "create {{ site.short_hand }} directories"
+  file:
+    state: directory
+    path: "/var/www/wordpress/wp_{{ site.short_hand }}/wp-content/{{ item }}"
+    owner: "{{ site.short_hand }}"
+    group: "{{ site.short_hand }}"
+    mode: "2750"
+  with_items:
+    - "plugins"
+    - "themes"
+    - "upgrade"
+    - "uploads"
+
+- name: "create {{ site.short_hand }} configuration"
+  template:
+    src: "roles/wordpress/templates/wp-config-client.php.j2"
+    dest: "/var/www/wordpress/wp_{{ site.short_hand }}/wp-config.php"
+    owner: "{{ site.short_hand }}"
+    group: "{{ site.short_hand }}"
+
+- name: create mysql databases
+  mysql_db:
+    login_user: root
+    name: "wp_{{ site.short_hand }}"
+    state: present
+
+- name: create mysql users
+  mysql_user:
+    login_user: root
+    name: "wp_{{ site.short_hand }}"
+    password: "{{ site.password }}"
+    priv: "wp_{{ site.short_hand }}.*:ALL"
+
+- name: create nginx site config
+  template:
+    src: "roles/wordpress/templates/nginx-client.j2"
+    dest: "/etc/nginx/sites-enabled/{{ site.domain }}"
+
+- name: create php-fpm config
+  template:
+    src: "roles/wordpress/templates/php-fpm.pool.conf.j2"
+    dest: "/etc/php/7.2/fpm/pool.d/{{ site.domain }}.conf"

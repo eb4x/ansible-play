@@ -1,0 +1,22 @@
+<?php
+define('DB_NAME', 'wp_{{ site.short_hand }}');
+define('DB_USER', 'wp_{{ site.short_hand }}');
+define('DB_PASSWORD', '{{ site.password }}');
+define('DB_HOST', 'localhost');
+
+{% raw -%}
+define('AUTH_KEY',         '1234567890123456789012345678901234567890123456789012345678901234');
+define('SECURE_AUTH_KEY',  'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl');
+define('LOGGED_IN_KEY',    '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef');
+define('NONCE_KEY',        'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210');
+define('AUTH_SALT',        '0000000000000000000REPLACE00000000000000000000000000000000000001');
+define('SECURE_AUTH_SALT', '1111111111111111111WITH11111111111111111111111111111111111111110');
+define('LOGGED_IN_SALT',   '2222222222222222222BETTER222222222222222222222222222222222222222');
+define('NONCE_SALT',       '3333333333333333333STUFF3333333333333333333333333333333333333333');
+{% endraw %}
+
+define('WP_HOME', 'http://{{ site.domain }}');
+
+define ('WP_DEBUG', true);
+define ('WP_DEBUG_LOG', true);
+

@@ -1,0 +1,41 @@
+upstream php {
+	server unix:/var/lib/socket;
+}
+
+server {
+	listen 80;
+	listen [::]:80;
+
+	server_name {{ site.domain }} {%- if site.aliases is defined -%}
+		{%- for alias in site.aliases %} alias{% endfor -%}
+	{%- endif %};
+
+	access_log /var/log/nginx/{{ site.domain }}.log;
+	error_log /var/log/nginx/{{ site.domain }}.err;
+
+	return 301 https://{{ site.domain }}$request_uri;
+}
+
+server {
+	server_name {{ site.domain }} {%- if site.aliases is defined -%}
+		{%- for alias in site.aliases %} alias{% endfor -%}
+	{%- endif %};
+
+	index index.php;
+
+	location / {
+		try_files $uri $uri/ /index.php?$args;
+	}
+
+	location ~ \.php$ {
+		include fastcgi.conf;
+		fastcgi_intercept_errors on;
+		fastcgi_pass php;
+	}
+
+	location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
+		expires max;
+		log_not_found off;
+
+	}
+}

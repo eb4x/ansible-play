@@ -1,8 +1,7 @@
 ---
 
 dependencies:
-  - { role: apache }
+  - { role: ssl-cert }
   - { role: mariadb }
-  - { role: ssl-certs }
-  - { role: php }
-
+  - { role: php-fpm }
+  - { role: nginx }
