@@ -3,8 +3,8 @@
 - name: install ssl-cert
   package:
     name: ssl-cert
-  when:
-    - ansible_os_family == 'Debian'
+    state: latest
+  when: ansible_os_family == "Debian"
 
 - name: check/create ssl-cert group
   group:
@@ -14,8 +14,47 @@
 
 - name: check/create /etc/ssl/private
   file:
-    path: /etc/ssl/private
     state: directory
-    mode: '2750'
+    path: "{{ item }}"
     owner: root
     group: ssl-cert
+    mode: '2710'
+  with_items:
+    - "/etc/ssl/private"
+    - "/var/www/html/.well-known/acme-challenge/"
+
+- name: generate {{ ansible_fqdn }} private key
+  openssl_privatekey:
+    path: /etc/ssl/private/{{ ansible_fqdn }}.key
+    owner: root
+    group: ssl-cert
+    mode: '0640'
+
+- name: copy letencrypt signing key
+  copy:
+    content: "{{ letsencrypt_account_key }}"
+    dest: /etc/ssl/private/letsencrypt.key
+    owner: root
+    group: ssl-cert
+    mode: '0640'
+
+- name: generate {{ ansible_fqdn }} csr
+  openssl_csr:
+    privatekey_path: /etc/ssl/private/{{ ansible_fqdn }}.key
+    path:            /etc/ssl/private/{{ ansible_fqdn }}.csr
+    common_name: "{{ ansible_fqdn }}"
+
+#- import_role:
+#    name: pip
+#  vars:
+#    pip_install: acme-tiny
+
+- name: get certificate
+  openssl_certificate:
+    privatekey_path: /etc/ssl/private/{{ ansible_fqdn }}.key
+    csr_path:        /etc/ssl/private/{{ ansible_fqdn }}.csr
+    path:            /etc/ssl/private/{{ ansible_fqdn }}.crt
+    provider: acme
+    acme_accountkey_path: /etc/ssl/private/letsencrypt.key
+    acme_challenge_path: /var/www/html/.well-known/acme-challenge/
+    acme_chain: false
