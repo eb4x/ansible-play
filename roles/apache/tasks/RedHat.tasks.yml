@@ -1,0 +1,121 @@
+---
+
+- name: check /var/lock/httpd directory
+  file:
+    path: /var/lock/httpd
+    state: directory
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"
+
+- name: check /var/www directory
+  file:
+    path: /var/www
+    state: directory
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"
+    mode: '2775'
+
+#
+# File management
+#
+
+- name: super-clean-out conf.modules.d/00-base.conf
+  script: split-00-base.conf.py
+    removes: "{{ apache_conf_dir }}/conf.modules.d/00-base.conf"
+
+- name: copy files
+  copy:
+    src: "{{ file.src }}"
+    dest: "{{ file.dest }}"
+  with_items:
+    - "{{ files_to_copy }}"
+  loop_control:
+    loop_var: file
+
+- name: stat files to move
+  stat:
+    path: "{{ file.src }}"
+  with_items: "{{ files_to_move }}"
+  loop_control:
+    loop_var: file
+  register: check
+
+- name: move files
+  command: "mv {{ res.file.src }} {{ res.file.dest }}"
+  with_items:
+    - "{{ check.results }}"
+  loop_control:
+    loop_var: res
+  when: res.stat.exists == True
+
+- name: remove files
+  file:
+    path: "{{ file }}"
+    state: absent
+  with_items:
+    - "{{ files_to_remove }}"
+  loop_control:
+    loop_var: file
+
+#
+# Configuration
+#
+
+- name: update /etc/sysconfig/httpd
+  lineinfile:
+    dest: /etc/sysconfig/httpd
+    regexp: '^OPTIONS=*'
+    line: "OPTIONS=\"-f httpd.conf\""
+    insertafter: '^#OPTIONS=*'
+    state: present
+  notify: service apache restart
+
+- name: strip Listen from ssl.conf
+  lineinfile:
+    dest: "{{ apache_conf_dir }}/mods-available/ssl.conf"
+    line: 'Listen 443 https'
+    state: absent
+
+- name: force TLSv1.2 only
+  lineinfile:
+    dest: "{{ apache_conf_dir }}/mods-available/ssl.conf"
+    line: 'SSLProtocol TLSv1.2'
+    state: present
+
+- name: strip <VirtualHost> from ssl.conf
+  replace:
+    dest: "{{ apache_conf_dir }}/mods-available/ssl.conf"
+    regexp: '^<VirtualHost _default_:443>((?:.|\n)*?)</VirtualHost>\s+$'
+    replace: ''
+
+- name: enable conf/mods
+  file:
+    src: "{{ file.src }}"
+    dest: "{{ file.dest }}"
+    state: "{{ file.state }}"
+  with_items:
+    - "{{ files_to_symlink }}"
+  loop_control:
+    loop_var: file
+
+# Residual
+
+- name: stat dir
+  stat:
+    path: "{{ dir }}"
+  with_items:
+    - "/etc/httpd/conf"
+    - "/etc/httpd/conf.d"
+    - "/etc/httpd/conf.modules.d"
+  loop_control:
+    loop_var: dir
+  register: check
+
+- name: remove residual files and symlinks
+  script: roles/apache/files/residual.py
+  when: res.stat.exists == True
+  with_items:
+    - "{{ check.results }}"
+  loop_control:
+    loop_var: res
+
