@@ -75,3 +75,4 @@
     owner: www-data
     group: www-data
     mode: "2755"
+    setype: httpd_sys_content_t

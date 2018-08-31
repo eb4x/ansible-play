@@ -1,2 +1,3 @@
 ---
+
 wp_version: "{{ wp_response.json.offers[0].current }}"
