@@ -3,138 +3,137 @@
 
   vars:
     nodes:
-    - name: regan
-      plan: Linode 1024
-      datacenter: london
-      distribution: CentOS 7
-    - name: sofia
-      plan: Linode 1024
-      datacenter: frankfurt
-      distribution: Debian 9
-    - name: tracy
-      plan: Linode 1024
-      datacenter: dallas
-      distribution: Ubuntu 16.04 LTS
+      - name: peggy
+        type: g6-nanode-1
+        region: us-east
+        image: linode/ubuntu18.04
+      - name: regan
+        type: g6-nanode-1
+        region: eu-west
+        image: linode/centos7
+      - name: sofia
+        type: g6-nanode-1
+        region: eu-central
+        image: linode/debian9
+      - name: tracy
+        type: g6-nanode-1
+        region: us-central
+        image: linode/ubuntu16.04lts
+
+# "us-central":   Dallas,  TX
+# "us-east":      Newark,  NJ
+# "us-southeast": Atlanta, GA
+# "us-west":      Fremont, CA
 
   pre_tasks:
-    - name: include secrets (linode_api_key)
+    - name: include secrets (linode_{auth_token,root_pass})
       include_vars: "secrets.yml"
 
-    - name: install python2 packages
-      package:
-        name: "{{ item }}"
-      with_items:
-        - python2-pip
-        - libcurl-devel
-        - libselinux-python
-      become: true
-
-    - name: install linode-python
-      pip:
-        name: "{{ item }}"
-        extra_args: '--user'
-      with_items:
-        - pycurl
-        - linode-python
-
   tasks:
-  - name: query linodes
-    uri:
-      url: "https://api.linode.com/?api_key={{ linode_api_key }}&api_action=linode.list"
-      return_content: true
-    register: _ls
-
-  - set_fact:
-      _linodes: "{{ _linodes | default({}) | combine({ item.LABEL : item.LINODEID }) }}"
-    with_items: "{{ _ls.json.DATA }}"
-
-  - name: query datacenters
-    uri:
-      url: "https://api.linode.com/?api_key={{ linode_api_key }}&api_action=avail.datacenters"
-      return_content: true
-    register: _ldcs
-
-  - set_fact:
-      _linode_datacenters: "{{ _linode_datacenters | default({}) | combine({ item.ABBR : item.DATACENTERID }) }}"
-    with_items: "{{ _ldcs.json.DATA }}"
-
-  - name: query plans
-    uri:
-      url: "https://api.linode.com/?api_key={{ linode_api_key }}&api_action=avail.linodeplans"
-      return_content: true
-    register: _lps
-
-  - set_fact:
-      _linode_plans: "{{ _linode_plans | default({}) | combine({ item.LABEL : item.PLANID }) }}"
-    with_items: "{{ _lps.json.DATA }}"
-
-  - name: query distributions
-    uri:
-      url: "https://api.linode.com/?api_key={{ linode_api_key }}&api_action=avail.distributions"
-      return_content: true
-    register: _lds
-
-  - set_fact:
-      _linode_distributions: "{{ _linode_distributions | default({}) | combine({ item.LABEL : item.DISTRIBUTIONID }) }}"
-    with_items: "{{ _lds.json.DATA }}"
-
-#  - debug:
-#      msg: "{{ _linodes }}"
-#    when: _linodes is defined
+#    - name: query regions
+#      uri:
+#        url: https://api.linode.com/v4/regions
+#        headers:
+#          Authorization: "Bearer {{ linode_auth_token }}"
+#      register: _lr
 #
-#  - debug:
-#      msg: "{{ _linode_datacenters }}"
-#    when: _linode_datacenters is defined
+#    - set_fact:
+#        _linode_regions: "{{ _linode_regions | default({}) | combine({ item.id : item.country }) }}"
+#      with_items: "{{ _lr.json.data }}"
 #
-#  - debug:
-#      msg: "{{ _linode_plans }}"
-#    when: _linode_plans is defined
+#    - name: query images
+#      uri:
+#        url: https://api.linode.com/v4/images
+#        headers:
+#          Authorization: "Bearer {{ linode_auth_token }}"
+#      register: _li
 #
-#  - debug:
-#      msg: "{{ _linode_distributions }}"
-#    when: _linode_distributions is defined
+#    - set_fact:
+#        _linode_images: "{{ _linode_images | default({}) | combine({ item.id : item.label }) }}"
+#      with_items: "{{ _li.json.data }}"
+#
+#    - name: query types
+#      uri:
+#        url: https://api.linode.com/v4/linode/types
+#        headers:
+#          Authorization: "Bearer {{ linode_auth_token }}"
+#      register: _lt
+#
+#    - set_fact:
+#        _linode_types: "{{ _linode_types | default({}) | combine({ item.id : item.label }) }}"
+#      with_items: "{{ _lt.json.data }}"
 
-##  - name: "filter out existing linodes"
-##    debug:
-##      var: _linodes | list
-##    when: _linodes is defined
-##
-##  - fail:
+    - name: query linodes
+      uri:
+        url: https://api.linode.com/v4/linode/instances
+        headers:
+          Authorization: "Bearer {{ linode_auth_token }}"
+        return_content: true
+      register: _ls
 
-  - name: create linode
-    linode:
-      api_key: "{{ linode_api_key }}"
-      name: "{{ item.name }}"
-      plan: "{{ _linode_plans[ item.plan ] }}"
-      datacenter: "{{ _linode_datacenters[ item.datacenter ] }}" 
-      distribution: "{{ _linode_distributions[ item.distribution ] }}"
-      alert_cpu_enabled: false
-      #alert_cpu_threshold: 2000
-      alert_diskio_enabled: false
-      #alert_diskio_threshold: 100000
-      alert_bwin_enabled: false
-      #alert_bwin_threshold: 40000
-      alert_bwout_enabled: false
-      #alert_bwout_threshold: 10000
-      alert_bwquota_enabled: false
-      #alert_bwquota_threshold: 400
-      ssh_pub_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
-      swap: 128
-      wait: yes
-      wait_timeout: 600
-      state: present
-    with_items: "{{ nodes }}"
-#    when: item.name not in (_linodes | list)
-    register: _created_linodes
+    - set_fact:
+        _linodes: "{{ _linodes | default({}) | combine({ item.label : item.id }) }}"
+      with_items: "{{ _ls.json.data }}"
 
-  - name: create inventory/linodes file
-    lineinfile:
-      path: inventory/linodes
-      create: true
-      line: "[linodes]"
+###
 
-  - name: populate inventory/linodes file
-    lineinfile:
-      path: inventory/linodes
-      line: "{{ item.item.name }} ansible_host={{ item.instance.ipv4 }}"
-    with_items: "{{ _created_linodes.results }}"
+    - debug:
+        var: _linodes
+      when: _linodes is defined
+
+    - debug:
+        var: _linode_regions
+      when: _linode_regions is defined
+
+    - debug:
+        var: _linode_types
+      when: _linode_types is defined
+
+    - debug:
+        var: _linode_images
+      when: _linode_images is defined
+
+###
+
+    - name: create linode
+      uri:
+        method: POST
+        url: https://api.linode.com/v4/linode/instances
+        headers:
+          Authorization: "Bearer {{ linode_auth_token }}"
+        body_format: json
+        body:
+          type: "{{ item.type }}"
+          region: "{{ item.region }}"
+          authorized_keys:
+            - "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+          image: "{{ item.image }}"
+          root_pass: "{{ linode_root_pass }}"
+          label: "{{ item.name }}"
+        return_content: true
+      with_items: "{{ nodes }}"
+      when: item.name not in ((_linodes | default({})) | list)
+      register: _linodes_created
+
+#    - debug:
+#        var: item
+#      with_items: "{{ _linodes_created.results }}"
+
+    - debug:
+        var: item.json.ipv4
+      with_items: "{{ _linodes_created.results }}"
+      when: item.json is defined
+
+    - name: create inventory/linodes file
+      lineinfile:
+        path: inventory/linodes
+        create: true
+        line: "[linodes]"
+
+    - name: populate inventory/linodes file
+      lineinfile:
+        path: inventory/linodes
+        regexp: "^{{ item.item.name }} *"
+        line: "{{ item.item.name }} ansible_host={{ item.json.ipv4[0] }}"
+      with_items: "{{ _linodes_created.results }}"
+      when: item.json is defined
