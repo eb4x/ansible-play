@@ -26,7 +26,7 @@
 # "us-west":      Fremont, CA
 
   pre_tasks:
-    - name: include secrets (linode_{auth_token,root_pass})
+    - name: include secrets (linode_{auth_token,root_pass,authorized_keys})
       include_vars: "secrets.yml"
 
   tasks:
@@ -90,8 +90,7 @@
         body:
           type: "{{ item.type }}"
           region: "{{ item.region }}"
-          authorized_keys:
-            - "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+          authorized_keys: "{{ linode_authorized_keys }}"
           image: "{{ item.image }}"
           root_pass: "{{ linode_root_pass }}"
           label: "{{ item.label }}"
