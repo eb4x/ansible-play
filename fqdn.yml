@@ -1,10 +1,18 @@
+- hostname:
+    name: "{{ inventory_hostname }}"
+  register: _hostname
+
+- name: refresh facts
+  setup:
+  when: _hostname is changed
+
 - name: fix /etc/hostname
   copy:
     content: |
       {{ ansible_hostname }}
     dest: /etc/hostname
 
-- name: fix /etc/hosts fqdn issues
+- name: fix /etc/hosts
   lineinfile:
     path: /etc/hosts
     regexp: '^127\.0\.1\.1.*$'
