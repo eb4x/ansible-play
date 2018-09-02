@@ -3,19 +3,19 @@
 
   vars:
     nodes:
-      - name: peggy
+      - label: peggy
         type: g6-nanode-1
         region: us-east
         image: linode/ubuntu18.04
-      - name: regan
+      - label: regan
         type: g6-nanode-1
         region: eu-west
         image: linode/centos7
-      - name: sofia
+      - label: sofia
         type: g6-nanode-1
         region: eu-central
         image: linode/debian9
-      - name: tracy
+      - label: tracy
         type: g6-nanode-1
         region: us-central
         image: linode/ubuntu16.04lts
@@ -72,26 +72,11 @@
       register: _ls
 
     - set_fact:
-        _linodes: "{{ _linodes | default({}) | combine({ item.label : item.id }) }}"
+        _linodes: "{{ _linodes | default({}) }}"
+
+    - set_fact:
+        _linodes: "{{ _linodes | combine({ item.label :  { 'json' : { 'label': item.label, 'ipv4': item.ipv4, 'image': item.image }, 'label': item.label } }) }}"
       with_items: "{{ _ls.json.data }}"
-
-###
-
-    - debug:
-        var: _linodes
-      when: _linodes is defined
-
-    - debug:
-        var: _linode_regions
-      when: _linode_regions is defined
-
-    - debug:
-        var: _linode_types
-      when: _linode_types is defined
-
-    - debug:
-        var: _linode_images
-      when: _linode_images is defined
 
 ###
 
@@ -109,20 +94,11 @@
             - "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
           image: "{{ item.image }}"
           root_pass: "{{ linode_root_pass }}"
-          label: "{{ item.name }}"
+          label: "{{ item.label }}"
         return_content: true
       with_items: "{{ nodes }}"
-      when: item.name not in ((_linodes | default({})) | list)
+      when: item.label not in _linodes
       register: _linodes_created
-
-#    - debug:
-#        var: item
-#      with_items: "{{ _linodes_created.results }}"
-
-    - debug:
-        var: item.json.ipv4
-      with_items: "{{ _linodes_created.results }}"
-      when: item.json is defined
 
     - name: create inventory/linodes file
       lineinfile:
@@ -133,7 +109,9 @@
     - name: populate inventory/linodes file
       lineinfile:
         path: inventory/linodes
-        regexp: "^{{ item.item.name }} *"
-        line: "{{ item.item.name }} ansible_host={{ item.json.ipv4[0] }}"
-      with_items: "{{ _linodes_created.results }}"
+        regexp: "^{{ item.json.label }} *"
+        line: "{{ item.json.label }} ansible_host={{ item.json.ipv4[0] }}{% if (item.json.image is search('ubuntu')) %} ansible_python_interpreter=/usr/bin/python3{% endif %}"
+      with_items:
+        - "{{ _linodes_created.results }}"
+        - "{{ _linodes | json_query('*') }}"
       when: item.json is defined
