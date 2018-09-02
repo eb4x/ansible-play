@@ -1,0 +1,11 @@
+- name: fix /etc/hostname
+  copy:
+    content: |
+      {{ ansible_hostname }}
+    dest: /etc/hostname
+
+- name: fix /etc/hosts fqdn issues
+  lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1.*$'
+    line: "127.0.1.1 {{ ansible_hostname }}.{{ domain_name | default('slipsprogrammor.no') }} {{ ansible_hostname }}"
