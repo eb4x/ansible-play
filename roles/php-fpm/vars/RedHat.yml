@@ -1,0 +1,47 @@
+---
+
+php_fpm:
+  version: 7.2
+  packages:
+    - php72u-fpm
+  service: php-fpm
+  systemd: /usr/lib/systemd/system
+  bin: /usr/sbin/php-fpm
+  conf_file: /etc/php-fpm.conf
+  pool_path: /etc/php-fpm.d
+  run_path: /run/php-fpm
+  state_path: /var/lib/php/fpm
+  log_path: /var/log/php-fpm
+  error_log: error.log
+  status_path: /usr/share
+  pid: php-fpm.pid
+  default_pool:
+    name: www
+    user: php-fpm
+    group: php-fpm
+    listen:
+      socket: www.sock
+      owner: root
+      group: root
+      mode: '0660'
+      tcp: 127.0.0.1:9000
+      allowed_clients: 127.0.0.1
+    env:
+    opcache:
+      file_cache: opcache
+    php_admin_value:
+      error_log: www-error.log
+      memory_limit: 128M
+    php_value:
+    pm:
+      max_children: 50
+      start_servers: 5
+      min_spare_servers: 5
+      max_spare_servers: 35
+    session:
+      save_path: session
+    slowlog: www-slow.log
+    soap:
+      wsdlcache: wsdlcache
+
+php_mysql: php72u-mysqlnd

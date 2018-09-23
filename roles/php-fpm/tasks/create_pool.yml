@@ -1,0 +1,7 @@
+---
+
+- name: create pool "{{ pool.name }}"
+  template:
+    src: pool.conf.jinja
+    dest: "{{ php_fpm.pool_path }}/{{ pool.name }}.conf"
+  check_mode: true

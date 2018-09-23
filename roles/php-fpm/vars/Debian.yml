@@ -1,26 +1,26 @@
 ---
 
 php_fpm:
-  version: 7.2
+  version: 7.0
   packages:
-    - php7.2-fpm
-  service: php7.2-fpm
+    - php7.0-fpm
+  service: php7.0-fpm
   systemd: /lib/systemd/system
-  bin: /usr/sbin/php-fpm7.2
-  conf_file: /etc/php/7.2/fpm/php-fpm.conf
-  pool_path: /etc/php/7.2/fpm/pool.d
+  bin: /usr/sbin/php-fpm7.0
+  conf_file: /etc/php/7.0/fpm/php-fpm.conf
+  pool_path: /etc/php/7.0/fpm/pool.d
   run_path: /run/php
   state_path: /var/lib/php-fpm
   log_path: /var/log
-  error_log: php7.2-fpm.log
-  status_path: /usr/share/php/7.2
-  pid: php7.2-fpm.pid
+  error_log: php7.0-fpm.log
+  status_path: /usr/share/php/7.0
+  pid: php7.0-fpm.pid
   default_pool:
     name: www
     user: www-data
     group: www-data
     listen:
-      socket: php7.2-fpm.sock
+      socket: php7.0-fpm.sock
       owner: www-data
       group: www-data
       mode: '0660'
@@ -38,4 +38,4 @@ php_fpm:
       save_path: session
     soap:
 
-php_mysql: php7.2-mysql
+php_mysql: php7.0-mysql

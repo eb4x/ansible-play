@@ -12,5 +12,28 @@
     name: "{{ item }}"
     state: latest
   with_items:
-    - "{{ php_fpm }}"
-    - "{{ php_mysql }}"
+    - "{{ php_fpm.packages }}"
+
+- name: php-fpm.conf
+  template:
+    src: php-fpm.conf.jinja
+    dest: "{{ php_fpm.conf_file }}"
+  check_mode: true
+
+- name: create default pool.conf
+  include_tasks: create_pool.yml
+  with_items:
+    - "{{ php_fpm.default_pool }}"
+  loop_control:
+    loop_var: pool
+
+- name: check against original systemd.service
+  template:
+    src: php-fpm.service.jinja
+    dest: "{{ php_fpm.systemd }}/{{ php_fpm.service }}.service"
+  check_mode: true
+
+- name: drop new systemd.service
+  template:
+    src: php-fpm.service.jinja
+    dest: "/etc/systemd/system/{{ php_fpm.service }}.service"
