@@ -1,0 +1,18 @@
+---
+
+- name: fix sudoers
+  replace:
+    dest: /etc/sudoers
+    regexp: "{{ sudoers.regexp }}"
+    replace: "{{ sudoers.line }}"
+  with_items:
+    - os: 'Debian'
+      regexp: '^%sudo\s+((?!NOPASSWD).)*$'
+      line: '%sudo ALL=(ALL:ALL) NOPASSWD: ALL'
+    - os: 'RedHat'
+      regexp: '^%wheel\s+((?!NOPASSWD).)*$'
+      line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+  loop_control:
+    loop_var: sudoers
+  when: ansible_os_family == sudoers.os
+  become: true
