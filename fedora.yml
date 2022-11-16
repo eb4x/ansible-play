@@ -66,20 +66,9 @@
       name: "{{ item }}"
       state: latest
     with_items:
-    - ansible-python3
-    - chromium
-    - deluge-gtk
     - gnome-tweak-tool
-    - google-chrome
-    - openssh-server
-    - NetworkManager-strongswan-gnome
-    - strongswan-charon-nm
     - nmap
     - renameutils
-    - steam
-    - sudo
-    - thunderbird
-    - unrar
     - vim-enhanced
     - "{{ monitor_programs }}"
     - "{{ disk_utils }}"
