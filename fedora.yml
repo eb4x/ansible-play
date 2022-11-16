@@ -14,8 +14,8 @@
     - fuse-exfat
     - fuse-sshfs
     devel_utils:
-    - automake
     - autoconf
+    - automake
     - gcc
     - gcc-c++
     - git
