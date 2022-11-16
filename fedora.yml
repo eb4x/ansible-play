@@ -23,15 +23,12 @@
     - libtool
     - redhat-rpm-config
     media:
-    - ffmpeg
-    - gstreamer1-libav
-    - gstreamer1-plugins-good
     - gstreamer1-plugins-bad-free
     - gstreamer1-plugins-bad-freeworld
-    - gstreamer1-plugins-bad-nonfree
+    - gstreamer1-plugins-good
     - gstreamer1-plugins-ugly
     - mplayer
-    - xine-lib-extras-freeworld
+    - mpv
     - youtube-dl
 
   pre_tasks:
