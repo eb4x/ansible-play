@@ -45,10 +45,19 @@
 
   pre_tasks:
   - name: fix sudoers
-    replace:
-      dest: /etc/sudoers
-      regexp: '^%wheel\s+((?!NOPASSWD).)*$'
-      replace: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    ansible.builtin.replace:
+      path: /etc/sudoers
+      regexp: "{{ item.regexp }}"
+      replace: "{{ item.replace }}"
+    loop_control:
+      label: "{{ item.label }}"
+    with_items:
+    - regexp: '^#?\s?+(?P<line>.*NOPASSWD.*)$'
+      replace: '\g<line>'
+      label: "enable with NOPASSWD"
+    - regexp: '^#?\s?+(?P<line>%wheel(?:(?!NOPASSWD).)*)$'
+      replace: '# \g<line>'
+      label: "disable without NOPASSWD"
     become: true
 
   - name: install rpmfusion repo
