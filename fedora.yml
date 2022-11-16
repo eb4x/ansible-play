@@ -22,15 +22,6 @@
     - jq
     - libtool
     - redhat-rpm-config
-    bcachefs:
-    - userspace-rcu-devel
-    - libuuid-devel
-    - libattr-devel
-    - keyutils-libs-devel
-    - libscrypt-devel
-    - libblkid-devel
-    - libsodium-devel
-    - zlib-devel
     media:
     - ffmpeg
     - gstreamer1-libav
@@ -96,7 +87,6 @@
     - "{{ monitor_programs }}"
     - "{{ disk_utils }}"
     - "{{ devel_utils }}"
-    - "{{ bcachefs }}"
     - "{{ media }}"
     become: true
 
@@ -115,7 +105,6 @@
     become: true
 
   tasks:
-
   - name: setup ssh
     systemd:
       name: sshd
