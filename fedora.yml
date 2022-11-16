@@ -61,19 +61,20 @@
     ignore_errors: true
     become: true
 
-  - name: install packages I want
-    dnf:
-      name: "{{ item }}"
+  - name: install packages
+    ansible.builtin.dnf:
+      name: "{{ packages | flatten }}"
       state: latest
-    with_items:
-    - gnome-tweaks
-    - nmap
-    - renameutils
-    - vim-enhanced
-    - "{{ monitor_programs }}"
-    - "{{ disk_utils }}"
-    - "{{ devel_utils }}"
-    - "{{ media }}"
+    vars:
+      packages:
+      - gnome-tweaks
+      - nmap
+      - renameutils
+      - vim-enhanced
+      - "{{ monitor_programs }}"
+      - "{{ disk_utils }}"
+      - "{{ devel_utils }}"
+      - "{{ media }}"
     become: true
 
   - name: remove packages I don't want
