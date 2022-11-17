@@ -77,15 +77,16 @@
       - "{{ media }}"
     become: true
 
-  - name: remove packages I don't want
-    dnf:
-      name: "{{ item }}"
+  - name: remove packages
+    ansible.builtin.dnf:
+      name: "{{ packages | flatten }}"
       state: absent
-    with_items:
-    - libreoffice-calc
-    - libreoffice-draw
-    - libreoffice-impress
-    - net-tools
+    vars:
+      packages:
+      - libreoffice-calc
+      - libreoffice-draw
+      - libreoffice-impress
+      - net-tools
     become: true
 
   tasks:
