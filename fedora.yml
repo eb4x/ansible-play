@@ -32,6 +32,11 @@
     - youtube-dl
 
   pre_tasks:
+  - ansible.builtin.pip:
+      name:
+      - psutil
+      extra_args: --user
+
   - name: fix sudoers
     ansible.builtin.replace:
       path: /etc/sudoers
@@ -96,3 +101,8 @@
       enabled: true
       state: started
     become: true
+
+  - name: enable fractional scaling in gnome
+    community.general.dconf:
+      key: /org/gnome/mutter/experimental-features
+      value: "['scale-monitor-framebuffer']"
