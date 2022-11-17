@@ -82,13 +82,10 @@
       name: "{{ item }}"
       state: absent
     with_items:
-    - evolution
     - libreoffice-calc
     - libreoffice-draw
     - libreoffice-impress
     - net-tools
-    - rhythmbox
-    - shotwell
     become: true
 
   tasks:
