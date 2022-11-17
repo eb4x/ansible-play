@@ -66,6 +66,20 @@
     ignore_errors: true
     become: true
 
+  - name: install openrazer repo
+    ansible.builtin.get_url:
+      url: "https://download.opensuse.org/repositories/hardware:/razer/Fedora_{{ ansible_distribution_major_version }}/hardware:razer.repo"
+      dest: "/etc/yum.repos.d/hardware:razer.repo"
+    become: true
+
+  - name: add user to plugdev
+    ansible.builtin.user:
+      name: "{{ ansible_facts.env.USERNAME | default(ansible_facts.env.USER) }}"
+      append: true
+      groups:
+        - plugdev
+    become: true
+
   - name: install packages
     ansible.builtin.dnf:
       name: "{{ packages | flatten }}"
@@ -74,6 +88,7 @@
       packages:
       - gnome-tweaks
       - nmap
+      - openrazer-meta
       - renameutils
       - vim-enhanced
       - "{{ monitor_programs }}"
